@@ -1,0 +1,58 @@
+@font-face {
+    font-family: 'Hatton';
+    src: url('/PA/assets/fonts/hatton-font-family/pp-hatton-ultralight-200.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Hatton';
+    src: url('/PA/assets/fonts/hatton-font-family/pp-hatton-medium-500.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Hatton';
+    src: url('/PA/assets/fonts/hatton-font-family/pp-hatton-bold-700.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+.font-hatton {
+    font-family: 'Hatton', 'Times New Roman', serif;
+    font-synthesis: none;
+}
+
+.bg-default{
+    background-color: #E8E2D9;
+}
+
+.font-text{
+    font-family: 'Hatton', 'Times New Roman', serif;
+    font-synthesis: none;
+    color: #3C3C3B;
+}
+
+.text-main{
+    color: #3C3C3B;
+}
+
+.bg-div{
+    background-color: #B09882;
+}
+
+.border-div{
+    border-color: #B09882;
+}
+
+.bg-button{
+    background-color: #C5B49E;
+}
+
+.text-accent{
+    color: #C5B49E;
+}
