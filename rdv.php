@@ -3,54 +3,7 @@ include('headers/header.php');
 ?>
 
 <main class="pb-20">
-    <section class="container mx-auto px-4 pt-12">
-        <div class="bg-div rounded-[48px] md:rounded-[72px] shadow-xl/20 px-6 py-10 md:px-12 md:py-14">
-            <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-                <div>
-                    <p class="font-hatton text-sm uppercase tracking-[0.35em] text-main/70 mb-4">Réservation client</p>
-                    <h1 class="font-hatton text-main text-4xl md:text-5xl leading-tight mb-5">
-                        Réservez votre soin en quelques étapes.
-                    </h1>
-                    <p class="text-main font-hatton text-lg max-w-2xl leading-relaxed">
-                        L’utilisateur peut choisir son soin, son expert et son créneau. Pour finaliser la réservation,
-                        il devra créer un compte ou se connecter avant validation.
-                    </p>
-
-                    <div class="mt-8 flex flex-wrap gap-4">
-                        <div class="rounded-full bg-[#E8E2D9] px-5 py-3 text-main font-hatton shadow-xl/10">
-                            1. Choix du soin
-                        </div>
-                        <div class="rounded-full bg-[#E8E2D9] px-5 py-3 text-main font-hatton shadow-xl/10">
-                            2. Expert & créneau
-                        </div>
-                        <div class="rounded-full bg-[#E8E2D9] px-5 py-3 text-main font-hatton shadow-xl/10">
-                            3. Compte requis
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-[#E8E2D9] rounded-[40px] p-6 md:p-8 shadow-xl/20">
-                    <p class="font-hatton text-main text-sm uppercase tracking-[0.35em] mb-4">Modes de paiement</p>
-                    <div class="space-y-4">
-                        <div class="flex items-start justify-between gap-4 rounded-[28px] border border-div px-5 py-4">
-                            <div>
-                                <p class="font-hatton text-main text-xl">Paiement en ligne</p>
-                                <p class="text-main/70 font-hatton text-sm">Le rendez-vous est ajouté au panier avant paiement.</p>
-                            </div>
-                            <span class="rounded-full bg-button px-4 py-2 font-hatton text-main">Panier</span>
-                        </div>
-                        <div class="flex items-start justify-between gap-4 rounded-[28px] border border-div px-5 py-4">
-                            <div>
-                                <p class="font-hatton text-main text-xl">Paiement sur place</p>
-                                <p class="text-main/70 font-hatton text-sm">Une confirmation par mail est ensuite envoyée au client.</p>
-                            </div>
-                            <span class="rounded-full bg-button px-4 py-2 font-hatton text-main">Email</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+   
 
     <section class="container mx-auto px-4 pt-12">
         <div class="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
@@ -235,7 +188,7 @@ include('headers/header.php');
                 </div>
             </form>
 
-            <aside class="space-y-6">
+            <aside class="sticky top-6 self-start space-y-6">
                 <div class="bg-div rounded-[40px] p-6 md:p-8 shadow-xl/20">
                     <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70 mb-4">Résumé</p>
                     <h2 class="font-hatton text-3xl text-main mb-6">Votre sélection</h2>
