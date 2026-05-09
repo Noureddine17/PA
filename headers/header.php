@@ -1,4 +1,7 @@
-<?php function currentPage()
+<?php
+session_start();
+
+function currentPage()
 {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     return basename($path ?: '');
@@ -31,20 +34,26 @@
                         class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "shop.php" ? 'text-[#B09882]' : '' ?>">Shop</a>
                     <a href="blog.php"
                         class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "blog.php" ? 'text-[#B09882]' : '' ?>">Blog</a>
-                    <a href="login.php"
-                        class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "login.php" ? 'text-[#B09882]' : '' ?>">Login</a>
-                    <a href="inscription.php"
-                        class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "inscription.php" ? 'text-[#B09882]' : '' ?>">
-                        Sign Up
-                    </a>
+
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <span class="font-hatton text-main px-3 py-2 text-sm">
+                            <?= htmlspecialchars($_SESSION['user_name']) ?>
+                        </span>
+                    <?php else: ?>
+                        <a href="login.php"
+                            class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "login.php" ? 'text-[#B09882]' : '' ?>">Login</a>
+                        <a href="inscription.php"
+                            class="hover:text-[#B09882] transition-colors px-3 py-2 rounded-md text-sm font-hatton font-medium <?= currentPage() === "inscription.php" ? 'text-[#B09882]' : '' ?>">
+                            Sign Up
+                        </a>
+                    <?php endif; ?>
+
                     <a href="panier.php"
                         class="ml-2 flex h-11 w-11 items-center justify-center rounded-full border border-div bg-[#F5F2ED] transition-all duration-300 hover:scale-105 hover:bg-button/60 <?= currentPage() === "shop.php" || currentPage() === "panier.php" ? 'ring-2 ring-[#B09882]/40' : '' ?>"
                         aria-label="Voir le panier">
                         <img src="/PA/assets/images/cart.svg" alt="Panier" class="h-6 w-6">
                     </a>
-
                 </div>
-
             </div>
         </div>
     </nav>
