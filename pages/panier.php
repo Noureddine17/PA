@@ -1,5 +1,5 @@
 <?php
-include('headers/header.php');
+include(__DIR__ . '/../headers/header.php');
 ?>
 
 <main class="pb-20">
@@ -10,7 +10,7 @@ include('headers/header.php');
             <section class="bg-[#F5F2ED] border border-div rounded-[40px] md:rounded-[56px] p-6 md:p-10 shadow-xl/20">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
                     <div>
-                        <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70">Récapitulatif</p>
+                        <p class="font-hatton text-sm uppercase tracking-[0.3em]">Récapitulatif</p>
                         <h2 class="font-hatton text-3xl text-main">Articles ajoutés au panier</h2>
                     </div>
                     <a href="shop.php"
@@ -23,9 +23,9 @@ include('headers/header.php');
 
                 <div id="cart-empty"
                     class="hidden rounded-[32px] border border-dashed border-div bg-default p-8 text-center shadow-xl/10">
-                    <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70 mb-3">Panier vide</p>
+                    <p class="font-hatton text-sm uppercase tracking-[0.3em] mb-3">Panier vide</p>
                     <h3 class="font-hatton text-3xl text-main mb-4">Aucun article pour le moment</h3>
-                    <p class="font-hatton text-main/80 leading-relaxed max-w-xl mx-auto mb-6">
+                    <p class="font-hatton leading-relaxed max-w-xl mx-auto mb-6">
                         Parcourez la boutique et ajoutez vos essentiels soin et cosmétique pour retrouver votre
                         sélection ici.
                     </p>
@@ -38,20 +38,20 @@ include('headers/header.php');
 
             <aside class="space-y-6">
                 <div class="bg-div rounded-[40px] p-6 md:p-8 shadow-xl/20">
-                    <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70 mb-4">Total</p>
+                    <p class="font-hatton text-sm uppercase tracking-[0.3em] mb-4">Total</p>
                     <h2 class="font-hatton text-3xl text-main mb-6">Résumé commande</h2>
 
                     <div class="space-y-4">
                         <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                            <p class="font-hatton text-main/70 text-sm mb-1">Articles</p>
+                            <p class="font-hatton text-sm mb-1">Articles</p>
                             <p class="font-hatton text-2xl text-main" id="summary-items">0</p>
                         </div>
                         <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                            <p class="font-hatton text-main/70 text-sm mb-1">Sous-total</p>
+                            <p class="font-hatton text-sm mb-1">Sous-total</p>
                             <p class="font-hatton text-2xl text-main" id="summary-subtotal">0 €</p>
                         </div>
                         <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                            <p class="font-hatton text-main/70 text-sm mb-1">Livraison</p>
+                            <p class="font-hatton text-sm mb-1">Livraison</p>
                             <p class="font-hatton text-2xl text-main">Offerte</p>
                         </div>
 
@@ -125,10 +125,10 @@ include('headers/header.php');
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em]">${item.type}</p>
+                            <p class="font-hatton text-sm uppercase tracking-[0.25em]">${item.type}</p>
                             <h3 class="font-hatton text-3xl text-main">${item.name}</h3>
                         </div>
-                        <p class="font-hatton text-main/80 leading-relaxed max-w-2xl">${item.subtitle}</p>
+                        <p class="font-hatton leading-relaxed max-w-2xl">${item.subtitle}</p>
                         <div class="flex flex-wrap gap-3">
                             <div class="rounded-full bg-[#E8E2D9] px-4 py-2 font-hatton text-main">
                                 Quantité : ${item.quantity}
@@ -196,5 +196,5 @@ include('headers/header.php');
 </script>
 
 <?php
-include('headers/footer.php');
+include(__DIR__ . '/../headers/footer.php');
 ?>

@@ -1,5 +1,5 @@
 <?php
-include('headers/header.php');
+include(__DIR__ . '/../headers/header.php');
 
 $blogPosts = [
     [
@@ -69,14 +69,14 @@ if ($requestedSlug !== null) {
     <section class="container mx-auto px-4 pt-10 md:pt-16">
         <div class="mx-auto max-w-5xl">
             <header class="mb-10 text-center md:mb-14">
-                <p class="font-hatton text-sm uppercase tracking-[0.35em] text-main/65 mb-4">Journal beauté</p>
+                <p class="font-hatton text-sm uppercase tracking-[0.35em] mb-4">Journal beauté</p>
                 <h1 class="font-hatton text-main text-4xl md:text-6xl leading-tight">Blog &amp; Actualités</h1>
             </header>
 
             <?php if ($selectedPost): ?>
                 <section class="mb-8">
                     <a href="blog.php"
-                        class="inline-flex items-center justify-center rounded-full border border-div bg-[#F5F2ED] px-6 py-3 font-hatton text-main transition-all duration-300 hover:scale-105 hover:bg-button/60">
+                        class="inline-flex items-center justify-center rounded-full border border-div bg-[#F5F2ED] px-6 py-3 font-hatton text-main transition-all duration-300 hover:scale-105">
                         Retour aux articles
                     </a>
                 </section>
@@ -86,7 +86,7 @@ if ($requestedSlug !== null) {
                         <span class="rounded-full bg-[#E8E2D9] px-4 py-2 font-hatton text-main text-sm">
                             <?= htmlspecialchars($selectedPost['category']) ?>
                         </span>
-                        <span class="font-hatton text-main/75 text-sm">
+                        <span class="font-hatton text-sm">
                             <?= htmlspecialchars($selectedPost['date']) ?> • <?= htmlspecialchars($selectedPost['read_time']) ?> de lecture
                         </span>
                     </div>
@@ -94,11 +94,11 @@ if ($requestedSlug !== null) {
                     <h2 class="font-hatton text-main text-4xl md:text-5xl leading-tight mb-5">
                         <?= htmlspecialchars($selectedPost['title']) ?>
                     </h2>
-                    <p class="font-hatton text-main/80 text-lg md:text-xl leading-relaxed mb-8 max-w-3xl">
+                    <p class="font-hatton text-lg md:text-xl leading-relaxed mb-8 max-w-3xl">
                         <?= htmlspecialchars($selectedPost['excerpt']) ?>
                     </p>
 
-                    <div class="flex items-center gap-6 text-main/80 mb-10">
+                    <div class="flex items-center gap-6 mb-10">
                         <span class="inline-flex items-center gap-2 font-hatton">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
                                 <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
@@ -126,14 +126,14 @@ if ($requestedSlug !== null) {
 
                         <aside class="space-y-5">
                             <div class="rounded-[30px] bg-[#E8E2D9] p-6">
-                                <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em] mb-2">À retenir</p>
+                                <p class="font-hatton text-sm uppercase tracking-[0.25em] mb-2">À retenir</p>
                                 <p class="font-hatton text-main leading-relaxed">
                                     Une routine claire, des actifs bien choisis et une application régulière produisent de meilleurs résultats qu’une accumulation de soins.
                                 </p>
                             </div>
 
                             <div class="rounded-[30px] bg-[#E8E2D9] p-6">
-                                <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em] mb-2">Interaction</p>
+                                <p class="font-hatton text-sm uppercase tracking-[0.25em] mb-2">Interaction</p>
                                 <p class="font-hatton text-main leading-relaxed">
                                     Le système de likes et de commentaires sera branché plus tard. La structure visuelle est déjà prévue ici.
                                 </p>
@@ -151,7 +151,7 @@ if ($requestedSlug !== null) {
                                     <span class="rounded-full bg-[#E8E2D9] px-4 py-2 font-hatton text-main text-sm">
                                         <?= htmlspecialchars($post['category']) ?>
                                     </span>
-                                    <span class="font-hatton text-main/75 text-sm">
+                                    <span class="font-hatton text-sm">
                                         <?= htmlspecialchars($post['date']) ?> • <?= htmlspecialchars($post['read_time']) ?> de lecture
                                     </span>
                                 </div>
@@ -160,13 +160,13 @@ if ($requestedSlug !== null) {
                                     <h2 class="font-hatton text-main text-3xl md:text-4xl mb-2 transition-colors duration-300 group-hover:text-[#F5F2ED]">
                                         <?= htmlspecialchars($post['title']) ?>
                                     </h2>
-                                    <p class="font-hatton text-main/80 text-lg leading-relaxed">
+                                    <p class="font-hatton text-lg leading-relaxed">
                                         <?= htmlspecialchars($post['excerpt']) ?>
                                     </p>
                                 </div>
 
                                 <div class="flex items-center justify-between gap-4 pt-2">
-                                    <div class="flex items-center gap-6 text-main/80">
+                                    <div class="flex items-center gap-6">
                                         <span class="inline-flex items-center gap-2 font-hatton">
                                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
                                                 <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
@@ -193,7 +193,7 @@ if ($requestedSlug !== null) {
                 <section class="mt-12 md:mt-16">
                     <div class="rounded-[34px] md:rounded-[38px] bg-div px-6 py-10 text-center shadow-xl/20 md:px-10 md:py-12">
                         <h2 class="font-hatton text-main text-4xl md:text-5xl mb-4">Événements à venir</h2>
-                        <p class="font-hatton text-main/80 text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+                        <p class="font-hatton text-lg leading-relaxed max-w-2xl mx-auto mb-8">
                             Rejoignez-nous pour notre atelier exclusif du 28 mars et découvrez nos rituels soin dans une ambiance intimiste.
                         </p>
                         <a href="#"
@@ -208,5 +208,5 @@ if ($requestedSlug !== null) {
 </main>
 
 <?php
-include('headers/footer.php');
+include(__DIR__ . '/../headers/footer.php');
 ?>

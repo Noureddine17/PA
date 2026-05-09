@@ -1,5 +1,5 @@
 <?php
-include('headers/header.php');
+include(__DIR__ . '/../headers/header.php');
 
 $productCatalog = [
     [
@@ -11,7 +11,7 @@ $productCatalog = [
         'benefits' => 'Confort immédiat, peau souple, routine quotidienne.',
         'usage' => 'Appliquer matin et soir sur peau propre.',
         'badge' => 'Iconique',
-        'image' => '/PA/assets/images/shop/hd-cream.jpg',
+        'image' => '../assets/images/shop/hd-cream.jpg',
     ],
     [
         'name' => 'Silk Cleanser',
@@ -22,7 +22,7 @@ $productCatalog = [
         'benefits' => 'Peau nette, toucher doux, confort après rinçage.',
         'usage' => 'Masser sur peau humide puis rincer à l’eau tiède.',
         'badge' => 'Essentiel',
-        'image' => '/PA/assets/images/shop/hd-cleanser.jpg',
+        'image' => '../assets/images/shop/hd-cleanser.jpg',
     ],
     [
         'name' => 'Glow Ritual',
@@ -33,7 +33,7 @@ $productCatalog = [
         'benefits' => 'Teint plus lumineux, grain de peau visuellement lissé.',
         'usage' => 'Appliquer en fine couche avant la crème de jour.',
         'badge' => 'Best-seller',
-        'image' => '/PA/assets/images/shop/hd-glow.jpg',
+        'image' => '../assets/images/shop/hd-glow.jpg',
     ],
     [
         'name' => 'Pure Balance',
@@ -44,7 +44,7 @@ $productCatalog = [
         'benefits' => 'Équilibre, confort, fini léger.',
         'usage' => 'Déposer quelques gouttes avant votre crème.',
         'badge' => 'Routine jour',
-        'image' => '/PA/assets/images/shop/hd-balance.jpg',
+        'image' => '../assets/images/shop/hd-balance.jpg',
     ],
     [
         'name' => 'Soft Veil',
@@ -55,7 +55,7 @@ $productCatalog = [
         'benefits' => 'Nutrition, souplesse, sensation apaisante.',
         'usage' => 'Appliquer sur le visage et le cou selon les besoins.',
         'badge' => 'Peaux sèches',
-        'image' => '/PA/assets/images/shop/hd-soft-veil.jpg',
+        'image' => '../assets/images/shop/hd-soft-veil.jpg',
     ],
     [
         'name' => 'Zen Drop',
@@ -66,7 +66,7 @@ $productCatalog = [
         'benefits' => 'Nutrition, éclat, confort nocturne.',
         'usage' => 'Réchauffer quelques gouttes entre les mains puis masser.',
         'badge' => 'Rituel nuit',
-        'image' => '/PA/assets/images/shop/hd-zen-drop.jpg',
+        'image' => '../assets/images/shop/hd-zen-drop.jpg',
     ],
 ];
 
@@ -80,31 +80,29 @@ $selectedProduct = $productCatalog[0];
                 <section class="bg-[#F5F2ED] border border-div rounded-[40px] md:rounded-[56px] p-6 md:p-10 shadow-xl/20">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
                         <div>
-                            <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70">Catalogue</p>
+                            <p class="font-hatton text-sm uppercase tracking-[0.3em]">Catalogue</p>
                             <h2 class="font-hatton text-3xl text-main">Produits disponibles</h2>
                         </div>
-                        <span class="rounded-full bg-button px-5 py-2 font-hatton text-main">
-                            <?= count($productCatalog) ?> produits
-                        </span>
+                      
                     </div>
 
                     <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         <?php foreach ($productCatalog as $product): ?>
                             <article class="rounded-[32px] border border-div bg-default p-5 shadow-xl/10">
-                                <div class="rounded-[26px] bg-[#E8E2D9] overflow-hidden mb-5 aspect-[4/3]">
+                                <div class="rounded-[26px] bg-[#E8E2D9]  mb-5 aspect-[4/3]">
                                     <img src="<?= htmlspecialchars($product['image']) ?>"
                                         alt="<?= htmlspecialchars($product['name']) ?>"
                                         class="h-full w-full object-cover">
                                 </div>
                                 <div class="mb-5">
-                                    <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em]">
+                                    <p class="font-hatton text-sm uppercase tracking-[0.25em]">
                                         <?= htmlspecialchars($product['type']) ?>
                                     </p>
                                     <h3 class="font-hatton text-3xl text-main">
                                         <?= htmlspecialchars($product['name']) ?>
                                     </h3>
                                 </div>
-                                <p class="font-hatton text-main/75 leading-relaxed mb-5">
+                                <p class="font-hatton leading-relaxed mb-5">
                                     <?= htmlspecialchars($product['subtitle']) ?>
                                 </p>
                                 <div class="flex items-center justify-between gap-4">
@@ -131,11 +129,11 @@ $selectedProduct = $productCatalog[0];
                 <section class="bg-div rounded-[40px] md:rounded-[56px] p-6 md:p-10 shadow-xl/20">
                     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-8">
                         <div>
-                            <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main/70">Fiche produit</p>
+                            <p class="font-hatton text-sm uppercase tracking-[0.3em]">Fiche produit</p>
                             <h2 class="font-hatton text-3xl text-main" id="product-name">
                                 <?= htmlspecialchars($selectedProduct['name']) ?>
                             </h2>
-                            <p class="font-hatton text-main/80 mt-2 text-lg" id="product-subtitle">
+                            <p class="font-hatton mt-2 text-lg" id="product-subtitle">
                                 <?= htmlspecialchars($selectedProduct['subtitle']) ?>
                             </p>
                         </div>
@@ -153,7 +151,7 @@ $selectedProduct = $productCatalog[0];
                                     class="h-full w-full object-cover">
                             </div>
                             <div class="rounded-[32px] bg-[#E8E2D9] min-h-[120px] p-6 flex flex-col justify-end">
-                                <p class="font-hatton text-main/70 uppercase tracking-[0.25em] text-sm mb-2" id="product-type">
+                                <p class="font-hatton uppercase tracking-[0.25em] text-sm mb-2" id="product-type">
                                     <?= htmlspecialchars($selectedProduct['type']) ?>
                                 </p>
                                 <p class="font-hatton text-4xl text-main" id="product-price">
@@ -164,19 +162,19 @@ $selectedProduct = $productCatalog[0];
 
                         <div class="space-y-5">
                             <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                                <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em] mb-2">Description</p>
+                                <p class="font-hatton text-sm uppercase tracking-[0.25em] mb-2">Description</p>
                                 <p class="font-hatton text-main leading-relaxed" id="product-description">
                                     <?= htmlspecialchars($selectedProduct['description']) ?>
                                 </p>
                             </div>
                             <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                                <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em] mb-2">Bénéfices</p>
+                                <p class="font-hatton text-sm uppercase tracking-[0.25em] mb-2">Bénéfices</p>
                                 <p class="font-hatton text-main leading-relaxed" id="product-benefits">
                                     <?= htmlspecialchars($selectedProduct['benefits']) ?>
                                 </p>
                             </div>
                             <div class="rounded-[28px] bg-[#E8E2D9] p-5">
-                                <p class="font-hatton text-main/70 text-sm uppercase tracking-[0.25em] mb-2">Utilisation</p>
+                                <p class="font-hatton text-sm uppercase tracking-[0.25em] mb-2">Utilisation</p>
                                 <p class="font-hatton text-main leading-relaxed" id="product-usage">
                                     <?= htmlspecialchars($selectedProduct['usage']) ?>
                                 </p>
@@ -322,5 +320,5 @@ $selectedProduct = $productCatalog[0];
 </script>
 
 <?php
-include('headers/footer.php');
+include(__DIR__ . '/../headers/footer.php');
 ?>

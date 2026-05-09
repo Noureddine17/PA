@@ -1,5 +1,45 @@
 <?php
-include('headers/header.php');
+session_start();
+require_once(__DIR__ . '/../config/connexion.php');
+require_once(__DIR__ . '/../config/functions.php');
+
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Email invalide.';
+    }
+
+    if (empty($password)) {
+        $errors[] = 'Le mot de passe est requis.';
+    }
+
+    if (empty($errors)) {
+        $stmt = $pdo->prepare('SELECT * FROM UTILISATEUR WHERE email = ?');
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        if (!$user || !password_verify($password, $user['mot_de_passe'])) {
+            $errors[] = 'Email ou mot de passe incorrect.';
+        } elseif (!$user['verif_email']) {
+            $errors[] = 'Vous devez confirmer votre email avant de vous connecter.';
+        } else {
+            $_SESSION['user_id'] = $user['id_user'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_name'] = $user['prenom'] . ' ' . $user['nom'];
+            $_SESSION['id_user'] = $user['id_user'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];
+
+            redirect('../index.php', 'success', 'Connexion réussie.');
+        }
+    }
+}
+
+include(__DIR__ . '/../headers/header.php');
 ?>
 
 <main class="px-4 py-10 md:py-16">
@@ -25,10 +65,20 @@ include('headers/header.php');
                         </div>
                     </div>
 
+                    <?php if (!empty($errors)): ?>
+                        <div class="mb-6 rounded-[20px] border border-red-200 bg-red-50 px-5 py-4">
+                            <?php foreach ($errors as $error): ?>
+                                <p class="font-hatton text-red-700 text-sm"><?= htmlspecialchars($error) ?></p>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
                     <form action="login.php" method="post" class="space-y-5">
                         <div>
                             <label for="email" class="mb-2 block font-hatton text-xl text-main">Email</label>
-                            <input type="email" id="email" name="email" placeholder="votre@email.com"
+                            <input type="email" id="email" name="email"
+                                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                                placeholder="votre@email.com"
                                 class="w-full rounded-full border border-[#D4C0AB] bg-[#EEE6DC] px-5 py-4 font-hatton text-main placeholder:text-[#B7A28D] focus:outline-none focus:ring-2 focus:ring-[#B09882]/40"
                                 required autocomplete="email" />
                         </div>
@@ -42,7 +92,7 @@ include('headers/header.php');
 
                         <div class="flex justify-end">
                             <a href="#"
-                                class="font-hatton text-sm text-[#B7A28D] transition-colors hover:text-main">
+                                class="font-hatton text-sm text-[#B7A28D] transition-colors">
                                 Mot de passe oublié ?
                             </a>
                         </div>
@@ -60,5 +110,5 @@ include('headers/header.php');
 
 
 <?php
-include('headers/footer.php');
+include(__DIR__ . '/../headers/footer.php');
 ?>

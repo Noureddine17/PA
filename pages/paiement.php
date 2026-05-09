@@ -1,12 +1,12 @@
 <?php
-include('headers/header.php');
+include('/../headers/header.php');
 ?>
 
 <main class="pb-20">
     <section class="container mx-auto px-4 pt-12">
         <div class="bg-div rounded-[48px] md:rounded-[72px] shadow-xl/20 px-6 py-10 md:px-12 md:py-14">
             <div class="max-w-3xl">
-                <p class="font-hatton text-sm uppercase tracking-[0.35em] text-main/70 mb-4">Paiement</p>
+                <p class="font-hatton text-sm uppercase tracking-[0.35em] mb-4">Paiement</p>
                 <h1 class="font-hatton text-main text-4xl md:text-5xl leading-tight mb-5">
                     Étape de paiement à connecter.
                 </h1>
@@ -30,5 +30,5 @@ include('headers/header.php');
 </main>
 
 <?php
-include('headers/footer.php');
+include(__DIR__ . '/../headers/footer.php');
 ?>
