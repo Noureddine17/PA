@@ -1,9 +1,7 @@
 <?php
 session_start();
-require_once(__DIR__ . '/../config/logs.php');
 require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/../config/functions.php');
-modiflog(true,$_POST['email']);
 
 $errors = [];
 
