@@ -207,7 +207,7 @@ include(__DIR__ . '/../headers/header.php');
     </section>
 </main>
 
-<script src="<?= url('assets/js/captcha.js') ?>"></script>
+<script src="<?= url('assets/js/captcha.js?=v2') ?>"></script>
 
 <?php
 include(__DIR__ . '/../headers/footer.php');
