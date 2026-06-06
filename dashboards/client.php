@@ -17,10 +17,6 @@ if (!$currentUser) {
 
 $_SESSION['role'] = $currentUser['role'];
 
-if ($currentUser['role'] === 'admin') {
-    redirect('admin.php');
-}
-
 if ($currentUser['role'] === 'expert') {
     redirect('expert.php');
 }
