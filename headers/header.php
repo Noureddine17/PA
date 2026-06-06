@@ -32,7 +32,13 @@ if ($isConnected) {
     }
 }
 
-$dashboardLink = ($_SESSION['role'] ?? '') === 'admin' ? 'dashboards/admin.php' : 'dashboards/client.php';
+$dashboardLink = 'dashboards/client.php';
+
+if (($_SESSION['role'] ?? '') === 'admin') {
+    $dashboardLink = 'dashboards/admin.php';
+} elseif (($_SESSION['role'] ?? '') === 'expert') {
+    $dashboardLink = 'dashboards/expert.php';
+}
 $dashboardPage = basename($dashboardLink);
 $userName = $_SESSION['user_name'] ?? $_SESSION['email'] ?? '';
 $alert = getAlert();

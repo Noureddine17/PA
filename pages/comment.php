@@ -12,7 +12,7 @@ $blogPosts = [
     ['slug' => 'routine-matin-vs-soir', 'title' => 'Routine Matin vs Soir'],
 ];
 
-$slug = $_GET['article'] ?? $_GET['article'] ?? $_GET['article'] ?? '';
+$slug = $_GET['article'] ?? '';
 if (empty($slug)) {
     redirect('blog.php');
 }

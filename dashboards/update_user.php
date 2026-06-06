@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('update_user.php?id=' . $userId, 'error', 'Email invalide.');
     }
 
-    if (!in_array($role, ['client', 'admin'])) {
+    if (!in_array($role, ['client', 'admin', 'expert'])) {
         redirect('update_user.php?id=' . $userId, 'error', 'Role invalide.');
     }
 
@@ -110,27 +110,34 @@ include(__DIR__ . '/../headers/header.php');
             <p class="font-hatton text-sm uppercase tracking-[0.3em] text-main">Admin</p>
             <h1 class="mt-3 font-hatton text-4xl text-main">Modifier un utilisateur</h1>
 
-            <form action="update_user.php?id=<?= htmlspecialchars($user['id_user']) ?>" method="post" class="mt-8 space-y-5">
+            <form action="update_user.php?id=<?= htmlspecialchars($user['id_user']) ?>" method="post"
+                class="mt-8 space-y-5">
                 <div>
                     <label for="prenom" class="font-hatton text-main">Prénom</label>
-                    <input type="text" id="prenom" name="prenom" value="<?= htmlspecialchars($user['prenom']) ?>" class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
+                    <input type="text" id="prenom" name="prenom" value="<?= htmlspecialchars($user['prenom']) ?>"
+                        class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
                 </div>
 
                 <div>
                     <label for="nom" class="font-hatton text-main">Nom</label>
-                    <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($user['nom']) ?>" class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
+                    <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($user['nom']) ?>"
+                        class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
                 </div>
 
                 <div>
                     <label for="email" class="font-hatton text-main">Email</label>
-                    <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
+                    <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"
+                        class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
                 </div>
 
                 <div>
                     <label for="role" class="font-hatton text-main">Role</label>
-                    <select id="role" name="role" class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
+                    <select id="role" name="role"
+                        class="mt-2 w-full rounded-full border border-[#CBB59D] bg-[#EEE6DC] px-5 py-3 font-hatton text-main">
                         <option value="client" <?= $user['role'] === 'client' ? 'selected' : '' ?>>client</option>
                         <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>admin</option>
+                        <option value="expert" <?= $user['role'] === 'expert' ? 'selected' : '' ?>>expert</option>
+
                     </select>
                 </div>
 

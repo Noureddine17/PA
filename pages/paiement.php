@@ -1,5 +1,5 @@
 <?php
-include('/../headers/header.php');
+include(__DIR__ . '/../headers/header.php');
 ?>
 
 <main class="pb-20">

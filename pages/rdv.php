@@ -2,6 +2,15 @@
 include(__DIR__ . '/../headers/header.php');
 
 $isConnected = isset($_SESSION['id_user']);
+
+$stmtExperts = $pdo->query("
+    SELECT id_user, prenom, nom
+    FROM UTILISATEUR
+    WHERE role = 'expert'
+    ORDER BY prenom, nom
+");
+$experts = $stmtExperts->fetchAll();
+$firstExpertName = empty($experts) ? 'Aucun expert' : trim($experts[0]['prenom'] . ' ' . $experts[0]['nom']);
 ?>
 
 <main class="pb-20">
@@ -36,7 +45,7 @@ $isConnected = isset($_SESSION['id_user']);
                                 data-duration="75 min" data-price="110 €">
                             <span
                                 class="block rounded-[28px] border border-div bg-default p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-button peer-checked:shadow-xl/20 peer-checked:border-[#8F755E]">
-                                <span class="font-hatton text-2xl text-main block mb-2">Rituel relaxant</span>
+                                <span class="font-hatton text-2xl text-main block mb-2">Rituel anti-stress</span>
                                 <span class="font-hatton text-sm block mb-4">Massage visage et détente profonde</span>
                                 <span class="font-hatton text-main">75 min • 110 €</span>
                             </span>
@@ -61,37 +70,29 @@ $isConnected = isset($_SESSION['id_user']);
                         <h2 class="font-hatton text-3xl text-main">Sélectionnez un expert</h2>
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="expert" value="Lina" class="peer sr-only" checked>
-                            <span
-                                class="block rounded-[28px] border border-div bg-white/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-default peer-checked:shadow-xl/20 peer-checked:border-[#8F755E]">
-                                <span class="font-hatton text-2xl text-main block">Lina</span>
-                                <span class="font-hatton text-sm block mt-2">Experte glow & soin signature</span>
-                                <span class="inline-block mt-4 rounded-full bg-button px-4 py-2 font-hatton text-main">4.9 / 5</span>
-                            </span>
-                        </label>
-
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="expert" value="Camille" class="peer sr-only">
-                            <span
-                                class="block rounded-[28px] border border-div bg-white/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-default peer-checked:shadow-xl/20 peer-checked:border-[#8F755E]">
-                                <span class="font-hatton text-2xl text-main block">Camille</span>
-                                <span class="font-hatton text-sm block mt-2">Spécialiste relaxation & rituel sensoriel</span>
-                                <span class="inline-block mt-4 rounded-full bg-button px-4 py-2 font-hatton text-main">4.8 / 5</span>
-                            </span>
-                        </label>
-
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="expert" value="Sarah" class="peer sr-only">
-                            <span
-                                class="block rounded-[28px] border border-div bg-white/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-default peer-checked:shadow-xl/20 peer-checked:border-[#8F755E]">
-                                <span class="font-hatton text-2xl text-main block">Sarah</span>
-                                <span class="font-hatton text-sm block mt-2">Référence peaux sensibles & hydratation</span>
-                                <span class="inline-block mt-4 rounded-full bg-button px-4 py-2 font-hatton text-main">5.0 / 5</span>
-                            </span>
-                        </label>
-                    </div>
+                    <?php if (empty($experts)): ?>
+                        <div class="rounded-[28px] border border-div bg-white/50 p-5">
+                            <p class="font-hatton text-main">
+                                Aucun expert disponible pour le moment.
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <?php foreach ($experts as $index => $expert): ?>
+                                <?php $expertName = trim($expert['prenom'] . ' ' . $expert['nom']); ?>
+                                <label class="block cursor-pointer">
+                                    <input type="radio" name="expert" value="<?= htmlspecialchars($expert['id_user']) ?>"
+                                        data-name="<?= htmlspecialchars($expertName) ?>" class="peer sr-only" <?= $index === 0 ? 'checked' : '' ?>>
+                                    <span
+                                        class="block rounded-[28px] border border-div bg-white/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-default peer-checked:shadow-xl/20 peer-checked:border-[#8F755E]">
+                                        <span class="font-hatton text-2xl text-main block"><?= htmlspecialchars($expertName) ?></span>
+                                        <span class="font-hatton text-sm block mt-2">Expert KAESKIN</span>
+                                        <span class="inline-block mt-4 rounded-full bg-button px-4 py-2 font-hatton text-main">Disponible</span>
+                                    </span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="mb-10">
@@ -110,30 +111,30 @@ $isConnected = isset($_SESSION['id_user']);
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="slot-list">
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="09:00" class="peer sr-only" checked>
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">09:00</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">09:00</span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="10:30" class="peer sr-only">
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">10:30</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">10:30</span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="12:00" class="peer sr-only">
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">12:00</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">12:00</span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="14:00" class="peer sr-only">
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">14:00</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">14:00</span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="15:30" class="peer sr-only">
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">15:30</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">15:30</span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="slot" value="17:00" class="peer sr-only">
-                                <span class="block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">17:00</span>
+                                <span class="slot-box block rounded-[24px] border border-div bg-default px-4 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E]">17:00</span>
                             </label>
                         </div>
                     </div>
@@ -178,7 +179,7 @@ $isConnected = isset($_SESSION['id_user']);
                                 Vous pouvez confirmer votre rendez-vous selon le mode de paiement choisi.
                             </p>
                             <div class="flex flex-col gap-4 md:flex-row md:items-center">
-                                <button type="submit"
+                                <button type="submit" <?= empty($experts) ? 'disabled' : '' ?>
                                     class="inline-flex items-center justify-center rounded-full bg-button px-8 py-4 font-hatton text-main transition-all duration-300 hover:scale-105">
                                     Confirmer le rendez-vous
                                 </button>
@@ -224,7 +225,7 @@ $isConnected = isset($_SESSION['id_user']);
                         </div>
                         <div class="rounded-[28px] bg-[#E8E2D9] p-5">
                             <p class="font-hatton text-sm mb-1">Expert</p>
-                            <p class="font-hatton text-2xl text-main" id="summary-expert">Lina</p>
+                            <p class="font-hatton text-2xl text-main" id="summary-expert"><?= htmlspecialchars($firstExpertName) ?></p>
                         </div>
                         <div class="rounded-[28px] bg-[#E8E2D9] p-5">
                             <p class="font-hatton text-sm mb-1">Date & créneau</p>
@@ -256,7 +257,7 @@ $isConnected = isset($_SESSION['id_user']);
 <script>
     const estConnecte = <?= $isConnected ? 'true' : 'false' ?>;
 </script>
-<script src="../assets/js/rdv.js"></script>
+<script src="../assets/js/rdv.js?v=2"></script>
 
 <?php
 include(__DIR__ . '/../headers/footer.php');

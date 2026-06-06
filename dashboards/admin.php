@@ -66,6 +66,9 @@ include(__DIR__ . '/../headers/header.php');
             <p class="mt-4 font-hatton text-main">
                 Vous êtes connecté en admin avec l'email : <?= htmlspecialchars($_SESSION['email']) ?>
             </p>
+            <a href="products.php" class="mt-5 inline-block rounded-full bg-button px-6 py-3 font-hatton text-main">
+                Gérer les produits du shop
+            </a>
         </div>
 
         <div class="mt-8 rounded-[38px] border border-[#CBB59D] bg-[#F7F3EE] px-6 py-8 md:px-10">

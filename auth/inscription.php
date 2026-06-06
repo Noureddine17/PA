@@ -12,10 +12,10 @@ $captchaImages = [
     'assets/images/captcha/veronika_andrews-anna-10217636_1920.jpg',
 ];
 
-if (!isset($_SESSION['captcha_x'], $_SESSION['captcha_y'], $_SESSION['captcha_image'])) {
-    $_SESSION['captcha_x'] = random_int(90, 250);
-    $_SESSION['captcha_y'] = random_int(45, 105);
+if (!isset($_SESSION['captcha_image'], $_SESSION['captcha_order'])) {
     $_SESSION['captcha_image'] = $captchaImages[array_rand($captchaImages)];
+    $_SESSION['captcha_order'] = [0, 1, 2, 3, 4, 5];
+    shuffle($_SESSION['captcha_order']);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $passwordConfirmation = $_POST['password_confirmation'] ?? '';
     $newsletter = isset($_POST['newsletter']);
-    $captchaPosition = (int) ($_POST['captcha_position'] ?? -100);
+    $captchaOrder = $_POST['captcha_order'] ?? '';
+    $captchaPieces = explode(',', $captchaOrder);
 
     if (empty($prenom)) {
         $errors[] = 'Le prénom est requis.';
@@ -47,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Les mots de passe ne correspondent pas.';
     }
 
-    if (abs($captchaPosition - $_SESSION['captcha_x']) > 10) {
+    if (count($captchaPieces) !== 6 || $captchaOrder !== '0,1,2,3,4,5') {
         $errors[] = 'Le captcha est incorrect.';
     }
 
@@ -78,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Bonjour $prenom,\n\nCliquez sur ce lien pour confirmer votre compte KAESKIN :\n$lien";
 
         sendMail($email, 'Confirmation de votre compte KAESKIN', $message);
+
+        unset($_SESSION['captcha_image'], $_SESSION['captcha_order']);
 
         redirect('login.php', 'success', 'Compte créé. Un email de confirmation vient de vous être envoyé.');
     }
@@ -169,25 +172,27 @@ include(__DIR__ . '/../headers/header.php');
 
                         <div>
                             <p class="mb-2 block font-hatton text-xl text-main">Captcha</p>
-                            <div class="relative h-[180px] overflow-hidden rounded-[24px] bg-cover bg-center"
-                                style="background-image: url('<?= url($_SESSION['captcha_image']) ?>');">
-                                <div class="absolute h-11 w-11 rounded-[10px] border-2 border-white/70 bg-black/35"
-                                    style="left: <?= (int) $_SESSION['captcha_x'] ?>px; top: <?= (int) $_SESSION['captcha_y'] ?>px;">
-                                </div>
-                                <div id="captcha-piece"
-                                    class="absolute left-0 h-11 w-11 rounded-[10px] bg-cover shadow-lg transition-shadow"
-                                    style="
-                                        top: <?= (int) $_SESSION['captcha_y'] ?>px;
-                                        background-image: url('<?= url($_SESSION['captcha_image']) ?>');
-                                        background-size: 416px 180px;
-                                        background-position: -<?= (int) $_SESSION['captcha_x'] ?>px -<?= (int) $_SESSION['captcha_y'] ?>px;
-                                    "></div>
+                            <div id="captcha-puzzle" class="grid grid-cols-3 overflow-hidden rounded-[24px] border border-[#D4C0AB]">
+                                <?php foreach ($_SESSION['captcha_order'] as $piece): ?>
+                                    <?php
+                                    $col = $piece % 3;
+                                    $row = (int) floor($piece / 3);
+                                    ?>
+                                    <button type="button" data-piece="<?= $piece ?>"
+                                        class="captcha-piece h-[90px] border border-[#F7F3EE] bg-cover"
+                                        style="
+                                            background-image: url('<?= url($_SESSION['captcha_image']) ?>');
+                                            background-size: 300% 200%;
+                                            background-position: <?= $col * 50 ?>% <?= $row *100?>%
+                                            
+                                        ">
+                                    </button>
+                                <?php endforeach; ?>
                             </div>
-                            <input type="range" id="captcha-range" class="mt-4 w-full cursor-pointer accent-[#B09882]"
-                                min="0" max="300" value="0">
-                            <input type="hidden" id="captcha-position" name="captcha_position" value="0">
+                            <input type="hidden" id="captcha-order" name="captcha_order"
+                                value="<?= htmlspecialchars(implode(',', $_SESSION['captcha_order'])) ?>">
                             <p class="mt-2 font-hatton text-sm text-main">
-                                Faites glisser la pièce au bon endroit.
+                                Cliquez sur deux morceaux pour les échanger et remettre l'image dans le bon ordre.
                             </p>
                         </div>
 
