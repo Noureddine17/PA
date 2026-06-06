@@ -1,5 +1,10 @@
 <?php
-include(__DIR__ . '/../headers/header.php');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once(__DIR__ . '/../config/functions.php');
+require_once(__DIR__ . '/../config/connexion.php');
 
 $blogPosts = [
     [
@@ -52,6 +57,77 @@ $blogPosts = [
     ],
 ];
 
+$validSlugs = array_column($blogPosts, 'slug');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['like_article'])) {
+    $likedSlug = $_POST['article_slug'] ?? '';
+
+    if (!isset($_SESSION['id_user'])) {
+        redirect('../auth/login.php', 'error', 'Vous devez vous connecter pour liker un article.');
+    }
+
+    if (in_array($likedSlug, $validSlugs, true)) {
+        $stmt = $pdo->prepare('SELECT id_like FROM BLOG_LIKE WHERE article_slug = ? AND id_user = ?');
+        $stmt->execute([$likedSlug, $_SESSION['id_user']]);
+        $existingLike = $stmt->fetch();
+
+        if ($existingLike) {
+            $stmt = $pdo->prepare('DELETE FROM BLOG_LIKE WHERE article_slug = ? AND id_user = ?');
+            $stmt->execute([$likedSlug, $_SESSION['id_user']]);
+        } else {
+            $stmt = $pdo->prepare('INSERT INTO BLOG_LIKE (article_slug, id_user) VALUES (?, ?)');
+            $stmt->execute([$likedSlug, $_SESSION['id_user']]);
+        }
+    }
+
+    $redirectUrl = 'blog.php';
+    // add fragment to preserve scroll position
+    if (!empty($likedSlug)) {
+        if (!empty($_POST['from_list'])) {
+            $redirectUrl .= '#post-' . urlencode($likedSlug);
+        } else {
+            $redirectUrl .= '?article=' . urlencode($likedSlug) . '#post-' . urlencode($likedSlug);
+        }
+    }
+    redirect($redirectUrl);
+}
+
+$likeCounts = array_fill_keys($validSlugs, 0);
+$likedArticles = [];
+$placeholders = implode(',', array_fill(0, count($validSlugs), '?'));
+
+$stmt = $pdo->prepare("SELECT article_slug, COUNT(*) AS total FROM BLOG_LIKE WHERE article_slug IN ($placeholders) GROUP BY article_slug");
+$stmt->execute($validSlugs);
+foreach ($stmt->fetchAll() as $likeRow) {
+    $likeCounts[$likeRow['article_slug']] = (int) $likeRow['total'];
+}
+
+// Comment counts (guarded if table missing)
+$commentCounts = array_fill_keys($validSlugs, 0);
+try {
+    $stmt = $pdo->prepare("SELECT article_slug, COUNT(*) AS total FROM BLOG_COMMENT WHERE article_slug IN ($placeholders) GROUP BY article_slug");
+    $stmt->execute($validSlugs);
+    foreach ($stmt->fetchAll() as $cRow) {
+        $commentCounts[$cRow['article_slug']] = (int) $cRow['total'];
+    }
+} catch (PDOException $e) {
+    // Table may not exist yet — keep default counts (from static data)
+}
+
+if (isset($_SESSION['id_user'])) {
+    $params = array_merge([$_SESSION['id_user']], $validSlugs);
+    $stmt = $pdo->prepare("SELECT article_slug FROM BLOG_LIKE WHERE id_user = ? AND article_slug IN ($placeholders)");
+    $stmt->execute($params);
+    $likedArticles = array_column($stmt->fetchAll(), 'article_slug');
+}
+
+foreach ($blogPosts as &$post) {
+    $post['likes'] = $likeCounts[$post['slug']] ?? 0;
+    $post['liked_by_user'] = in_array($post['slug'], $likedArticles, true);
+    $post['comments'] = $commentCounts[$post['slug']] ?? $post['comments'];
+}
+unset($post);
+
 $selectedPost = null;
 $requestedSlug = $_GET['article'] ?? null;
 
@@ -63,6 +139,21 @@ if ($requestedSlug !== null) {
         }
     }
 }
+
+// fetch comments for selected post (guarded)
+$selectedPostComments = [];
+if ($selectedPost) {
+    try {
+        $stmt = $pdo->prepare('SELECT c.*, u.prenom, u.nom FROM BLOG_COMMENT c JOIN UTILISATEUR u ON c.id_user = u.id_user WHERE c.article_slug = ? ORDER BY c.created_at DESC');
+        $stmt->execute([$selectedPost['slug']]);
+        $selectedPostComments = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        // Table may not exist yet — leave comments empty
+        $selectedPostComments = [];
+    }
+}
+
+include(__DIR__ . '/../headers/header.php');
 ?>
 
 <main class="pb-20">
@@ -81,7 +172,7 @@ if ($requestedSlug !== null) {
                     </a>
                 </section>
 
-                <article class="rounded-[36px] md:rounded-[48px] bg-div px-6 py-8 md:px-10 md:py-12 shadow-xl/20">
+                <article id="post-<?= htmlspecialchars($selectedPost['slug']) ?>" class="rounded-[36px] md:rounded-[48px] bg-div px-6 py-8 md:px-10 md:py-12 shadow-xl/20">
                     <div class="flex flex-wrap items-center gap-3 mb-6">
                         <span class="rounded-full bg-[#E8E2D9] px-4 py-2 font-hatton text-main text-sm">
                             <?= htmlspecialchars($selectedPost['category']) ?>
@@ -99,18 +190,29 @@ if ($requestedSlug !== null) {
                     </p>
 
                     <div class="flex items-center gap-6 mb-10">
-                        <span class="inline-flex items-center gap-2 font-hatton">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
-                            </svg>
-                            <?= $selectedPost['likes'] ?>
-                        </span>
-                        <span class="inline-flex items-center gap-2 font-hatton">
+                        <form action="blog.php<?= $requestedSlug ? '?article=' . urlencode($selectedPost['slug']) : '' ?>" method="post" class="inline-flex items-center gap-2">
+                            <input type="hidden" name="article_slug" value="<?= htmlspecialchars($selectedPost['slug']) ?>">
+                            <input type="hidden" name="like_article" value="1">
+                            <button type="submit" class="inline-flex items-center gap-2 font-hatton rounded-full px-4 py-2 <?= $selectedPost['liked_by_user'] ? 'bg-red-600 text-white' : 'bg-button text-main' ?> shadow-md hover:scale-105 transition-all duration-200" aria-label="Like">
+                                <?php if ($selectedPost['liked_by_user']): ?>
+                                    <svg class="h-5 w-5 text-current" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7">
+                                        <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
+                                    </svg>
+                                <?php else: ?>
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                                        <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
+                                    </svg>
+                                <?php endif; ?>
+                                <span class="font-hatton font-semibold"><?= $selectedPost['likes'] ?></span>
+                            </button>
+                        </form>
+
+                        <a href="comment.php?article=<?= urlencode($selectedPost['slug']) ?>" class="inline-flex items-center gap-2 font-hatton rounded-full px-3 py-1 bg-button text-main shadow-md hover:scale-105 transition-all duration-200">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
                                 <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.47 8.47 0 0 1-3.42-.72L3 21l1.72-6.08A8.47 8.47 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
                             </svg>
-                            <?= $selectedPost['comments'] ?>
-                        </span>
+                            <span class="font-hatton font-semibold"><?= $selectedPost['comments'] ?></span>
+                        </a>
                     </div>
 
                     <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -140,11 +242,39 @@ if ($requestedSlug !== null) {
                             </div>
                         </aside>
                     </div>
+
+                    <div class="mt-8">
+                        <h3 class="font-hatton text-2xl mb-4">Commentaires (<?= count($selectedPostComments) ?>)</h3>
+                        <div class="space-y-4">
+                            <?php if (empty($selectedPostComments)): ?>
+                                <p class="font-hatton text-main">Aucun commentaire pour le moment.</p>
+                            <?php else: ?>
+                                <?php foreach ($selectedPostComments as $c): ?>
+                                    <div class="rounded-lg bg-[#F5F2ED] p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <strong class="font-hatton"><?= htmlspecialchars($c['prenom'] . ' ' . $c['nom']) ?></strong>
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-sm text-[#7a6a58]"><?= htmlspecialchars($c['created_at']) ?></span>
+                                                <?php if (isset($_SESSION['id_user']) && $_SESSION['id_user'] == $c['id_user']): ?>
+                                                    <form action="delete_comment.php" method="post" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                                        <input type="hidden" name="comment_id" value="<?= (int)$c['id_comment'] ?>">
+                                                        <input type="hidden" name="article_slug" value="<?= htmlspecialchars($selectedPost['slug']) ?>">
+                                                        <button type="submit" class="text-sm text-red-600">Supprimer</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <p class="font-hatton text-main"><?= nl2br(htmlspecialchars($c['content'])) ?></p>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </article>
             <?php else: ?>
                 <section class="space-y-6 md:space-y-7">
                     <?php foreach ($blogPosts as $post): ?>
-                        <a href="blog.php?article=<?= urlencode($post['slug']) ?>"
+                        <a id="post-<?= htmlspecialchars($post['slug']) ?>" href="blog.php?article=<?= urlencode($post['slug']) ?>"
                             class="group block rounded-[30px] md:rounded-[34px] bg-div px-6 py-6 md:px-8 md:py-7 shadow-xl/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20">
                             <article class="flex flex-col gap-4">
                                 <div class="flex flex-wrap items-center gap-3">
@@ -167,18 +297,32 @@ if ($requestedSlug !== null) {
 
                                 <div class="flex items-center justify-between gap-4 pt-2">
                                     <div class="flex items-center gap-6">
-                                        <span class="inline-flex items-center gap-2 font-hatton">
-                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                                <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
-                                            </svg>
-                                            <?= $post['likes'] ?>
-                                        </span>
-                                        <span class="inline-flex items-center gap-2 font-hatton">
-                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                                <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.47 8.47 0 0 1-3.42-.72L3 21l1.72-6.08A8.47 8.47 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
-                                            </svg>
-                                            <?= $post['comments'] ?>
-                                        </span>
+                                        <form action="blog.php" method="post" class="inline-flex items-center gap-2">
+                                            <input type="hidden" name="article_slug" value="<?= htmlspecialchars($post['slug']) ?>">
+                                            <input type="hidden" name="like_article" value="1">
+                                            <input type="hidden" name="from_list" value="1">
+                                            <button type="submit" onclick="event.stopPropagation();" class="inline-flex items-center gap-2 font-hatton rounded-full px-3 py-1 <?= $post['liked_by_user'] ? 'bg-red-600 text-white' : 'bg-button text-main' ?> shadow-md hover:scale-105 transition-all duration-200" aria-label="Like">
+                                                <?php if ($post['liked_by_user']): ?>
+                                                    <svg class="h-5 w-5 text-current" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7">
+                                                        <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
+                                                    </svg>
+                                                <?php else: ?>
+                                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                                                        <path d="M12 20.5s-7-4.35-7-10.16A4.34 4.34 0 0 1 9.34 6 4.85 4.85 0 0 1 12 7.56 4.85 4.85 0 0 1 14.66 6 4.34 4.34 0 0 1 19 10.34C19 16.15 12 20.5 12 20.5Z" />
+                                                    </svg>
+                                                <?php endif; ?>
+                                                <span class="font-hatton font-semibold"><?= $post['likes'] ?></span>
+                                            </button>
+                                        </form>
+                                        <form action="comment.php" method="get" class="inline-flex items-center" onsubmit="event.stopPropagation();">
+                                            <input type="hidden" name="article" value="<?= htmlspecialchars($post['slug']) ?>">
+                                            <button type="submit" onclick="event.stopPropagation();" class="inline-flex items-center gap-2 font-hatton rounded-full px-3 py-1 bg-button text-main shadow-md hover:scale-105 transition-all duration-200" aria-label="Comment">
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                                                    <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.47 8.47 0 0 1-3.42-.72L3 21l1.72-6.08A8.47 8.47 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
+                                                </svg>
+                                                <span class="font-hatton font-semibold"><?= $post['comments'] ?></span>
+                                            </button>
+                                        </form>
                                     </div>
 
                                     <span class="font-hatton text-main text-sm uppercase tracking-[0.25em] transition-colors duration-300 group-hover:text-[#F5F2ED]">
