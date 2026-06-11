@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $protocole = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $lien = $protocole . '://' . $_SERVER['HTTP_HOST'] . '/PA/auth/verifier_email.php?token=' . $token;
+        $lien = $protocole . '://' . $_SERVER['HTTP_HOST'] . '/auth/verifier_email.php?token=' . $token;
         $message = "Bonjour $prenom,\n\nCliquez sur ce lien pour confirmer votre compte KAESKIN :\n$lien";
 
         sendMail($email, 'Confirmation de votre compte KAESKIN', $message);
