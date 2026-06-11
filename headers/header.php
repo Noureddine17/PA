@@ -12,7 +12,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = '/PA';
+$baseUrl = '';
 
 function url($path)
 {
