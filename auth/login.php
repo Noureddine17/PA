@@ -4,7 +4,7 @@ require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/../config/functions.php');
 
 $data = json_decode(file_get_contents('php://input'), true);
-modiflog();
+
 
 $errors = [];
 
@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['id_user'] = $user['id_user'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $user['role'];
+            modiflog(true,$email);
 
             redirect('../index.php', 'success', 'Connexion réussie.');
         }
