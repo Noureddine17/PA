@@ -2,14 +2,14 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$timeout = 5 * 60; 
+$timeout = 1 * 60; 
 
 if (isset($_SESSION['id_user'])) {
     if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
         session_unset();
         session_destroy();
 
-        header('Location: /PA/auth/login.php?error=session_expired');
+        header('Location: /auth/login.php?error=session_expired');
         exit;
     }
 
