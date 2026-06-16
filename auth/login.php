@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $user['role'];
             modiflog(true,$email);
+            $_SESSION['last_activity'] = time();
 
             redirect('../index.php', 'success', 'Connexion réussie.');
         }
