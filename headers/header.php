@@ -2,6 +2,19 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+$timeout = 5 * 60; 
+
+if (isset($_SESSION['id_user'])) {
+    if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
+        session_unset();
+        session_destroy();
+
+        header('Location: /PA/auth/login.php?error=session_expired');
+        exit;
+    }
+
+    $_SESSION['last_activity'] = time();
+}
 
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
