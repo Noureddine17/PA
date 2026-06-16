@@ -3,6 +3,9 @@ session_start();
 require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/../config/functions.php');
 
+$data = json_decode(file_get_contents('php://input'), true);
+modiflog();
+
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
