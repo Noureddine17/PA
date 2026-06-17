@@ -1,8 +1,8 @@
 <?php
 $host = '127.0.0.1';
-$dbname = 'PA';
-$user = 'phpmyadmin';
-$password = 'root';
+$dbname = 'kaeskin';
+$user = 'useresgi';
+$password = 'password';
 
 try {
     $pdo = new PDO(
