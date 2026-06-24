@@ -67,14 +67,14 @@ include(__DIR__ . '/headers/header.php');
 
     <div class="container mx-auto px-4 py-1 pb-16">
         <div
-            class="flex flex-1 w-full justify-between bg-div rounded-[105px] shadow-xl/20 h-[283px] mx-auto mt-20 px-10 py-10">
-            <div class=" justify-center items-center flex flex-row flex-wrap gap-60 mx-auto px-10 py-10">
-                <h1 class="text-4xl font-bold font-text font-medium">Rejoignez notre newsletter</h1>
-                <form action="" class="flex flex-row items-center gap-8">
-                    <input type="email" placeholder=" Entrez votre email"
-                        class="bg-default rounded-[105px] border py-4 px-3 text-main font-hatton">
+            class="w-full bg-div rounded-[36px] shadow-xl/20 mx-auto mt-20 px-6 py-8 md:rounded-[105px] md:px-10 md:py-10">
+            <div class="grid items-center gap-6 md:grid-cols-[1fr_auto] md:gap-10">
+                <h1 class="text-center text-3xl font-bold font-text font-medium md:text-left md:text-4xl">Rejoignez notre newsletter</h1>
+                <form action="" class="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center md:w-auto md:gap-6">
+                    <input type="email" placeholder="Entrez votre email"
+                        class="w-full bg-default rounded-[105px] border py-4 px-5 text-main font-hatton sm:w-72 md:w-80">
                     <button type="submit"
-                        class="bg-button hover:!bg-[#E8E2D9] hover:!text-[#B09882] hover:scale-105 transition-all duration-300 text-white font-bold py-4 px-6 rounded-[105px]  font-hatton font-medium">
+                        class="bg-button hover:!bg-[#E8E2D9] hover:!text-[#B09882] hover:scale-105 transition-all duration-300 text-white font-bold py-4 px-6 rounded-[105px] font-hatton font-medium">
                         S'abonner
                     </button>
                 </form>

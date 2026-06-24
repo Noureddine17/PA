@@ -1,7 +1,7 @@
 const baseUrl = window.APP_BASE_URL || '';
 const formulaireRdv = document.getElementById('rdv-form');
-const messageRdv = document.getElementById('rdv-message');
 const dateRdv = document.getElementById('date');
+const listeCreneaux = document.getElementById('slot-list');
 
 const resumeSoin = document.getElementById('summary-service');
 const resumeExpert = document.getElementById('summary-expert');
@@ -10,6 +10,8 @@ const resumeDuree = document.getElementById('summary-duration');
 const resumePrix = document.getElementById('summary-price');
 const resumePaiement = document.getElementById('summary-payment');
 const noteValidation = document.getElementById('validation-note');
+const hiddenDuration = document.getElementById('hidden-duration');
+const hiddenPrice = document.getElementById('hidden-price');
 
 if (dateRdv.value === '') {
     let aujourdhui = new Date();
@@ -38,6 +40,11 @@ function changerResume() {
     resumeDuree.textContent = soin.dataset.duration;
     resumePrix.textContent = soin.dataset.price;
     resumeExpert.textContent = expert ? expert.dataset.name : 'Aucun expert';
+
+    if (hiddenDuration) {
+        hiddenDuration.value = soin.dataset.duration;
+        hiddenPrice.value = soin.dataset.price;
+    }
     resumeCreneau.textContent = creneau ? formatDate(dateRdv.value) + ' • ' + creneau.value : 'Aucun créneau disponible';
     resumePaiement.textContent = paiement.value;
 
@@ -45,74 +52,38 @@ function changerResume() {
         noteValidation.textContent = 'Action suivante : ajout du rendez-vous au panier.';
     } else {
         noteValidation.textContent = 'Action suivante : envoi d’un mail de confirmation pour paiement sur place.';
+        
     }
 }
 
-function afficherMessage(message, erreur) {
-    messageRdv.textContent = message;
-    messageRdv.classList.remove('hidden');
+function creerBoutonCreneau(heure) {
+    let label = document.createElement('label');
+    label.className = 'cursor-pointer';
 
-    if (erreur) {
-        messageRdv.classList.remove('bg-[#DDEEDC]');
-        messageRdv.classList.add('bg-red-50', 'text-red-700');
-    } else {
-        messageRdv.classList.add('bg-[#DDEEDC]');
-        messageRdv.classList.remove('bg-red-50', 'text-red-700');
-    }
+    let input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'slot';
+    input.value = heure;
+    input.className = 'peer sr-only';
+
+    let box = document.createElement('span');
+    box.className = 'slot-box block rounded-[20px] border border-div bg-default px-3 py-4 text-center font-hatton text-main transition-all duration-300 hover:shadow-xl/20 peer-checked:bg-button peer-checked:border-[#8F755E] sm:rounded-[24px] sm:px-4';
+    box.textContent = heure;
+
+    label.appendChild(input);
+    label.appendChild(box);
+
+    return label;
 }
 
-function ajouterRdvAuPanier(idRdv) {
-    let soin = document.querySelector('input[name="service"]:checked');
-    let expert = document.querySelector('input[name="expert"]:checked');
-    let creneau = document.querySelector('input[name="slot"]:checked');
+function afficherAucunCreneau(message) {
+    listeCreneaux.innerHTML = '';
 
-    let panier = localStorage.getItem('kaeskin-cart');
+    let texte = document.createElement('p');
+    texte.className = 'col-span-full rounded-[20px] bg-default px-4 py-4 text-center font-hatton text-main';
+    texte.textContent = message;
 
-    if (panier) {
-        panier = JSON.parse(panier);
-    } else {
-        panier = [];
-    }
-
-    panier.push({
-        name: soin.value,
-        type: 'Rendez-vous',
-        subtitle: formatDate(dateRdv.value) + ' à ' + creneau.value + ' avec ' + expert.dataset.name,
-        price: Number(soin.dataset.price.replace('€', '').trim()),
-        quantity: 1,
-        image: baseUrl + '/assets/images/services/droplet.svg',
-        rdv_id: idRdv
-    });
-
-    localStorage.setItem('kaeskin-cart', JSON.stringify(panier));
-}
-
-function reserverRdv() {
-    let soin = document.querySelector('input[name="service"]:checked');
-    let expert = document.querySelector('input[name="expert"]:checked');
-    let creneau = document.querySelector('input[name="slot"]:checked');
-    let paiement = document.querySelector('input[name="payment_mode"]:checked');
-
-    if (!soin || !expert || !creneau || !paiement) {
-        afficherMessage('Veuillez choisir un créneau disponible.', true);
-        return Promise.reject();
-    }
-
-    return fetch(baseUrl + '/auth/reserver_rdv.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            service: soin.value,
-            expert_id: expert.value,
-            date: dateRdv.value,
-            heure: creneau.value,
-            duree: soin.dataset.duration,
-            prix: soin.dataset.price,
-            payment_mode: paiement.value
-        })
-    });
+    listeCreneaux.appendChild(texte);
 }
 
 function mettreAJourCreneaux() {
@@ -127,30 +98,53 @@ function mettreAJourCreneaux() {
             return response.json();
         })
         .then(function(data) {
+            let creneaux = data.slots || [];
             let creneauxReserves = data.reserved || [];
+            let creneauxPasses = data.unavailable || [];
             let premierDisponible = null;
+
+            listeCreneaux.innerHTML = '';
+
+            if (creneaux.length === 0) {
+                afficherAucunCreneau('Aucun créneau disponible.');
+                changerResume();
+                return;
+            }
+
+            creneaux.forEach(function(creneau) {
+                listeCreneaux.appendChild(creerBoutonCreneau(creneau));
+            });
 
             document.querySelectorAll('input[name="slot"]').forEach(function(input) {
                 let label = input.closest('label');
                 let box = label.querySelector('.slot-box');
                 let reserve = creneauxReserves.includes(input.value);
+                let passe = creneauxPasses.includes(input.value);
+                let bloque = reserve || passe;
 
-                input.disabled = reserve;
-                label.classList.toggle('cursor-not-allowed', reserve);
-                label.classList.toggle('cursor-pointer', !reserve);
-                box.classList.toggle('bg-gray-200', reserve);
-                box.classList.toggle('text-gray-400', reserve);
-                box.classList.toggle('line-through', reserve);
-                box.classList.toggle('opacity-60', reserve);
-                box.classList.toggle('pointer-events-none', reserve);
-                label.title = reserve ? 'Créneau déjà réservé' : '';
-                box.textContent = reserve ? input.value + ' réservé' : input.value;
+                input.disabled = bloque;
+                label.classList.toggle('cursor-not-allowed', bloque);
+                label.classList.toggle('cursor-pointer', !bloque);
+                box.classList.toggle('bg-gray-200', bloque);
+                box.classList.toggle('text-gray-400', bloque);
+                box.classList.toggle('line-through', bloque);
+                box.classList.toggle('opacity-60', bloque);
+                box.classList.toggle('pointer-events-none', bloque);
+                label.title = reserve ? 'Créneau déjà réservé' : (passe ? 'Créneau déjà passé' : '');
 
-                if (reserve && input.checked) {
+                if (reserve) {
+                    box.textContent = input.value + ' réservé';
+                } else if (passe) {
+                    box.textContent = input.value + ' passé';
+                } else {
+                    box.textContent = input.value;
+                }
+
+                if (bloque && input.checked) {
                     input.checked = false;
                 }
 
-                if (!reserve && premierDisponible === null) {
+                if (!bloque && premierDisponible === null) {
                     premierDisponible = input;
                 }
             });
@@ -159,12 +153,7 @@ function mettreAJourCreneaux() {
                 premierDisponible.checked = true;
             }
 
-            if (!premierDisponible) {
-                afficherMessage('Tous les créneaux sont déjà réservés pour cet expert à cette date.', true);
-            } else {
-                messageRdv.classList.add('hidden');
-            }
-
+            // No more JS messages, handled by PHP reload
             changerResume();
         });
 }
@@ -179,44 +168,21 @@ document.querySelectorAll('input[type="radio"]').forEach(function(input) {
     });
 });
 
+listeCreneaux.addEventListener('change', changerResume);
+
 dateRdv.addEventListener('change', function() {
     mettreAJourCreneaux();
     changerResume();
 });
 
-formulaireRdv.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    if (estConnecte === false) {
-        window.location.href = baseUrl + '/auth/login.php';
-        return;
-    }
-
-    let paiement = document.querySelector('input[name="payment_mode"]:checked');
-
-    reserverRdv()
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            if (!data.success) {
-                afficherMessage(data.message, true);
-                mettreAJourCreneaux();
-                return;
-            }
-
-            if (paiement.value === 'Paiement en ligne') {
-                ajouterRdvAuPanier(data.id_rdv);
-                window.location.href = baseUrl + '/pages/panier.php';
-            } else {
-                afficherMessage(data.message, false);
-                mettreAJourCreneaux();
-            }
-        })
-        .catch(function() {
-            afficherMessage('La réservation n’a pas pu être enregistrée.', true);
-        });
-});
-
-mettreAJourCreneaux();
-changerResume();
+if (formulaireRdv) {
+    formulaireRdv.addEventListener('submit', function(event) {
+        // Redirect to login if not connected, but let the form submit otherwise
+        if (estConnecte === false) {
+            event.preventDefault();
+            window.location.href = baseUrl + '/auth/login.php';
+        }
+    });
+    mettreAJourCreneaux();
+    changerResume();
+}

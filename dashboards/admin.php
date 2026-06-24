@@ -3,23 +3,7 @@ session_start();
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-if (!isset($_SESSION['id_user'])) {
-    redirect('../auth/login.php', 'error', 'Vous devez vous connecter.');
-}
-
-$stmt = $pdo->prepare('SELECT role FROM UTILISATEUR WHERE id_user = ?');
-$stmt->execute([$_SESSION['id_user']]);
-$currentUser = $stmt->fetch();
-
-if (!$currentUser) {
-    redirect('../auth/login.php', 'error', 'Utilisateur introuvable.');
-}
-
-$_SESSION['role'] = $currentUser['role'];
-
-if ($currentUser['role'] !== 'admin') {
-    redirect('client.php', 'error', 'Accès réservé aux administrateurs.');
-}
+requireRole($pdo, 'admin', '../auth/login.php', 'client.php', 'Accès réservé aux administrateurs.');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -69,8 +53,14 @@ include(__DIR__ . '/../headers/header.php');
             <a href="products.php" class="mt-5 inline-block rounded-full bg-button px-6 py-3 font-hatton text-main">
                 Gérer les produits du shop
             </a>
+            <a href="creneaux.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
+                Gérer les créneaux RDV
+            </a>
             <a href="client.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
                 Mes rendez-vous / chat
+            </a>
+            <a href="../pages/captcha.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
+                Ajouter des images pour le captcha
             </a>
         </div>
 
@@ -96,6 +86,8 @@ include(__DIR__ . '/../headers/header.php');
                     </thead>
                     <tbody>
                         <?php foreach ($users as $user): ?>
+                           <?php $date_from_db = $user['date_inscription'];
+                                $timestamp = strtotime($date_from_db);?>
                             <tr class="border-b border-[#E8E2D9]">
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['id_user']) ?></td>
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['prenom'] . ' ' . $user['nom']) ?></td>
@@ -103,7 +95,7 @@ include(__DIR__ . '/../headers/header.php');
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['role']) ?></td>
                                 <td class="px-4 py-3"><?= $user['newsletter'] ? 'Oui' : 'Non' ?></td>
                                 <td class="px-4 py-3"><?= $user['verif_email'] ? 'Oui' : 'Non' ?></td>
-                                <td class="px-4 py-3"><?= htmlspecialchars($user['date_inscription']) ?></td>
+                                <td class="px-4 py-3"><?= date('d/m/Y', $timestamp) ?></td>
                                 <td class="px-4 py-3">
                                     <div class="flex flex-col gap-2">
                                         <a href="update_user.php?id=<?= htmlspecialchars($user['id_user']) ?>" class="rounded-full bg-button px-4 py-2 text-center font-hatton text-main">

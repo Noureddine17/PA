@@ -29,6 +29,7 @@ function afficherCarteProduit($product, $isAdmin = false)
                 <span class="font-hatton text-2xl text-main"><?= (float) $product['price'] ?> €</span>
                 <button type="button"
                     class="add-product rounded-full bg-button px-5 py-3 font-hatton text-main transition-all duration-300 hover:scale-105"
+                    data-id="<?= htmlspecialchars($product['id']) ?>"
                     data-name="<?= htmlspecialchars($product['name']) ?>"
                     data-type="<?= htmlspecialchars($product['type']) ?>"
                     data-price="<?= htmlspecialchars($product['price']) ?>"

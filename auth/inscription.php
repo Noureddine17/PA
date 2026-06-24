@@ -4,15 +4,23 @@ require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/../config/functions.php');
 
 $errors = [];
-$captchaImages = [
-    'assets/images/captcha/ahmetyuksek-snow-covered-peaks-9771614_1920.jpg',
-    'assets/images/captcha/alexandersix16-cenote-10225212_1920.jpg',
-    'assets/images/captcha/ruslansikunov-chamomile-10065194_1920.jpg',
-    'assets/images/captcha/studio_lichtfang-to-stage-9858926_1920.jpg',
-    'assets/images/captcha/veronika_andrews-anna-10217636_1920.jpg',
-];
+$captchaImages = [];
+$captchaDir = __DIR__ . '/../assets/images/captcha/';
+if (is_dir($captchaDir)) {
+    $files = scandir($captchaDir);
+    foreach ($files as $file) {
+        if ($file !== '.' && $file !== '..') {
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $captchaImages[] = 'assets/images/captcha/' . $file;
+            }
+        }
+    }
+}
 
-if (!isset($_SESSION['captcha_image'], $_SESSION['captcha_order'])) {
+if (empty($captchaImages)) {
+    $errors[] = 'Aucune image captcha disponible.';
+} elseif (!isset($_SESSION['captcha_image'], $_SESSION['captcha_order'])) {
     $_SESSION['captcha_image'] = $captchaImages[array_rand($captchaImages)];
     $_SESSION['captcha_order'] = [0, 1, 2, 3, 4, 5];
     shuffle($_SESSION['captcha_order']);
@@ -172,28 +180,34 @@ include(__DIR__ . '/../headers/header.php');
 
                         <div>
                             <p class="mb-2 block font-hatton text-xl text-main">Captcha</p>
-                            <div id="captcha-puzzle" class="grid grid-cols-3 overflow-hidden rounded-[24px] border border-[#D4C0AB]">
-                                <?php foreach ($_SESSION['captcha_order'] as $piece): ?>
-                                    <?php
-                                    $col = $piece % 3;
-                                    $row = (int) floor($piece / 3);
-                                    ?>
-                                    <button type="button" data-piece="<?= $piece ?>"
-                                        class="captcha-piece h-[90px] border border-[#F7F3EE] bg-cover"
-                                        style="
-                                            background-image: url('<?= url($_SESSION['captcha_image']) ?>');
-                                            background-size: 300% 200%;
-                                            background-position: <?= $col * 50 ?>% <?= $row *100?>%
-                                            
-                                        ">
-                                    </button>
-                                <?php endforeach; ?>
-                            </div>
-                            <input type="hidden" id="captcha-order" name="captcha_order"
-                                value="<?= htmlspecialchars(implode(',', $_SESSION['captcha_order'])) ?>">
-                            <p class="mt-2 font-hatton text-sm text-main">
-                                Cliquez sur deux morceaux pour les échanger et remettre l'image dans le bon ordre.
-                            </p>
+                            <?php if (isset($_SESSION['captcha_image'], $_SESSION['captcha_order'])): ?>
+                                <div id="captcha-puzzle" class="grid grid-cols-3 overflow-hidden rounded-[24px] border border-[#D4C0AB]">
+                                    <?php foreach ($_SESSION['captcha_order'] as $piece): ?>
+                                        <?php
+                                        $col = $piece % 3;
+                                        $row = (int) floor($piece / 3);
+                                        ?>
+                                        <button type="button" data-piece="<?= $piece ?>"
+                                            class="captcha-piece h-[90px] border border-[#F7F3EE] bg-cover"
+                                            style="
+                                                background-image: url('<?= url($_SESSION['captcha_image']) ?>');
+                                                background-size: 300% 200%;
+                                                background-position: <?= $col * 50 ?>% <?= $row *100?>%
+                                                
+                                            ">
+                                        </button>
+                                    <?php endforeach; ?>
+                                </div>
+                                <input type="hidden" id="captcha-order" name="captcha_order"
+                                    value="<?= htmlspecialchars(implode(',', $_SESSION['captcha_order'])) ?>">
+                                <p class="mt-2 font-hatton text-sm text-main">
+                                    Cliquez sur deux morceaux pour les échanger et remettre l'image dans le bon ordre.
+                                </p>
+                            <?php else: ?>
+                                <p class="rounded-[20px] border border-red-200 bg-red-50 px-5 py-4 font-hatton text-red-700">
+                                    Aucune image captcha disponible.
+                                </p>
+                            <?php endif; ?>
                         </div>
 
                         <button type="submit"

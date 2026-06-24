@@ -11,7 +11,6 @@ $blogPosts = [
         'slug' => '5-etapes-peau-radieuse',
         'title' => '5 Étapes pour une Peau Radieuse',
         'excerpt' => 'Découvrez nos conseils d’experts pour maintenir une peau éclatante.',
-        'likes' => 124,
         'comments' => 18,
         'category' => 'Conseils',
         'read_time' => '4 min',
@@ -27,7 +26,6 @@ $blogPosts = [
         'slug' => 'science-de-nos-serums',
         'title' => 'La Science de nos Sérums',
         'excerpt' => 'Apprenez tout sur les ingrédients puissants de nos produits.',
-        'likes' => 89,
         'comments' => 12,
         'category' => 'Ingrédients',
         'read_time' => '5 min',
@@ -43,7 +41,6 @@ $blogPosts = [
         'slug' => 'routine-matin-vs-soir',
         'title' => 'Routine Matin vs Soir',
         'excerpt' => 'Comprenez la différence entre les routines A.M et P.M.',
-        'likes' => 156,
         'comments' => 24,
         'category' => 'Routine',
         'read_time' => '3 min',
@@ -340,10 +337,13 @@ include(__DIR__ . '/../headers/header.php');
                         <p class="font-hatton text-lg leading-relaxed max-w-2xl mx-auto mb-8">
                             Rejoignez-nous pour notre atelier exclusif du 28 mars et découvrez nos rituels soin dans une ambiance intimiste.
                         </p>
+                        <?php if (!isset($_SESSION['id_user'])): ?>
                         <a href="#"
                             class="inline-flex items-center justify-center rounded-full bg-[#E8E2D9] px-8 py-4 font-hatton text-main transition-all duration-300 hover:scale-105 hover:bg-[#F5F2ED]">
                             S’inscrire
                         </a>
+                        <?php else: ?>
+                        <?php endif; ?>
                     </div>
                 </section>
             <?php endif; ?>

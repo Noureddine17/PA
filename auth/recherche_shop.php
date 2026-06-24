@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once(__DIR__ . '/../config/connexion.php');
+require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../includes/product_card.php');
 
 header('Content-Type: text/html; charset=UTF-8');
@@ -11,14 +12,7 @@ header('Content-Type: text/html; charset=UTF-8');
 $isAdmin = false;
 
 if (isset($_SESSION['id_user'])) {
-    $stmt = $pdo->prepare('SELECT role FROM UTILISATEUR WHERE id_user = ?');
-    $stmt->execute([$_SESSION['id_user']]);
-    $currentUser = $stmt->fetch();
-
-    if ($currentUser && $currentUser['role'] === 'admin') {
-        $isAdmin = true;
-        $_SESSION['role'] = 'admin';
-    }
+    $isAdmin = isCurrentAdmin($pdo);
 }
 
 $search = trim($_GET['search'] ?? '');

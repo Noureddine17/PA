@@ -3,23 +3,7 @@ session_start();
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-if (!isset($_SESSION['id_user'])) {
-    redirect('../auth/login.php', 'error', 'Vous devez vous connecter.');
-}
-
-$stmt = $pdo->prepare('SELECT role FROM UTILISATEUR WHERE id_user = ?');
-$stmt->execute([$_SESSION['id_user']]);
-$currentUser = $stmt->fetch();
-
-if (!$currentUser) {
-    redirect('../auth/login.php', 'error', 'Utilisateur introuvable.');
-}
-
-$_SESSION['role'] = $currentUser['role'];
-
-if ($currentUser['role'] !== 'admin') {
-    redirect('client.php', 'error', 'Accès réservé aux administrateurs.');
-}
+requireRole($pdo, 'admin', '../auth/login.php', 'client.php', 'Accès réservé aux administrateurs.');
 
 $productId = (int) ($_GET['id'] ?? 0);
 $product = [

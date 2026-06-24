@@ -5,49 +5,52 @@ require_once(__DIR__ . '/../config/connexion.php');
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['id_user'])) {
-    echo json_encode(['success' => false, 'message' => 'Vous devez vous connecter.']);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect('../pages/rdv.php');
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+requireLogin();
 
-if (!$data) {
-    echo json_encode(['success' => false, 'message' => 'Données manquantes.']);
-    exit;
-}
-
-$idClient = (int) $_SESSION['id_user'];
-$idExpert = (int) ($data['expert_id'] ?? 0);
-$service = trim($data['service'] ?? '');
-$date = trim($data['date'] ?? '');
-$heure = trim($data['heure'] ?? '');
-$duree = trim($data['duree'] ?? '');
-$prixLabel = trim($data['prix'] ?? '');
-$modePaiement = trim($data['payment_mode'] ?? '');
+$idClient = (int)$_SESSION['id_user'];
+$idExpert = (int)($_POST['expert'] ?? 0);
+$service = trim($_POST['service'] ?? '');
+$date = trim($_POST['date'] ?? '');
+$heure = trim($_POST['slot'] ?? '');
+$duree = trim($_POST['duree'] ?? '');
+$prixLabel = trim($_POST['prix'] ?? '');
+$modePaiement = trim($_POST['payment_mode'] ?? '');
 $prixTexte = str_replace('€', '', $prixLabel);
 $prixTexte = str_replace(' ', '', $prixTexte);
-$prix = (float) str_replace(',', '.', $prixTexte);
+$prix = (float)str_replace(',', '.', $prixTexte);
 $dateChoisie = DateTime::createFromFormat('Y-m-d', $date);
-$creneauxPossibles = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00'];
+$timezone = new DateTimeZone('Europe/Paris');
+$dateHeureChoisie = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . $heure, $timezone);
+$maintenant = new DateTime('now', $timezone);
 
-if ($idExpert <= 0 || $service === '' || $duree === '' || $prix <= 0 || $modePaiement === '') {
-    echo json_encode(['success' => false, 'message' => 'Informations du rendez-vous incomplètes.']);
-    exit;
+if ($idExpert <= 0 || $service === '' || $duree === '' || $prix <= 0 || $modePaiement === '' || $heure === '') {
+    redirect('../pages/rdv.php', 'error', 'Informations du rendez-vous incomplètes.');
 }
 
-if (!$dateChoisie || $dateChoisie->format('Y-m-d') !== $date || !in_array($heure, $creneauxPossibles)) {
-    echo json_encode(['success' => false, 'message' => 'Date ou horaire invalide.']);
-    exit;
+if (!$dateChoisie || $dateChoisie->format('Y-m-d') !== $date) {
+    redirect('../pages/rdv.php', 'error', 'Date ou horaire invalide.');
+}
+
+$stmt = $pdo->prepare('SELECT id_creneau FROM CRENEAU_RDV WHERE heure = ? AND actif = 1 LIMIT 1');
+$stmt->execute([$heure . ':00']);
+$creneauExiste = $stmt->fetch();
+if (!$creneauExiste) {
+    redirect('../pages/rdv.php', 'error', 'Ce créneau n’est pas disponible.');
+}
+
+if (!$dateHeureChoisie || $dateHeureChoisie <= $maintenant) {
+    redirect('../pages/rdv.php', 'error', 'Ce créneau est déjà passé.');
 }
 
 $stmt = $pdo->prepare("SELECT id_user, prenom, nom FROM UTILISATEUR WHERE id_user = ? AND role = 'expert'");
 $stmt->execute([$idExpert]);
 $expert = $stmt->fetch();
-
 if (!$expert) {
-    echo json_encode(['success' => false, 'message' => 'Expert introuvable.']);
-    exit;
+    redirect('../pages/rdv.php', 'error', 'Expert introuvable.');
 }
 
 $stmt = $pdo->prepare('
@@ -58,10 +61,8 @@ $stmt = $pdo->prepare('
 ');
 $stmt->execute([$idExpert, $date, $heure . ':00', 'confirme']);
 $rdvExiste = $stmt->fetch();
-
 if ($rdvExiste) {
-    echo json_encode(['success' => false, 'message' => 'Ce créneau est déjà réservé.']);
-    exit;
+    redirect('../pages/rdv.php', 'error', 'Ce créneau est déjà réservé.');
 }
 
 try {
@@ -70,27 +71,33 @@ try {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ');
     $stmt->execute([$idClient, $idExpert, $service, $date, $heure, $duree, $prix, $modePaiement]);
+    $idRdv = (int)$pdo->lastInsertId();
 } catch (PDOException $e) {
     if ($e->getCode() === '23000') {
-        echo json_encode(['success' => false, 'message' => 'Ce créneau vient déjà d’être réservé.']);
-        exit;
+        redirect('../pages/rdv.php', 'error', 'Ce créneau vient d’être réservé.');
     }
-
-    echo json_encode(['success' => false, 'message' => 'Erreur lors de la réservation.']);
-    exit;
+    redirect('../pages/rdv.php', 'error', 'Erreur lors de la réservation.');
 }
 
-$idRdv = (int) $pdo->lastInsertId();
 $expertName = trim($expert['prenom'] . ' ' . $expert['nom']);
 
 if ($modePaiement === 'Paiement sur place') {
     $message = "Bonjour,\n\nVotre rendez-vous KAESKIN est confirmé.\n\nSoin : $service\nExpert : $expertName\nDate : $date\nHeure : $heure\nDurée : $duree\nPrix : $prixLabel\nPaiement : sur place\n\nA bientôt chez KAESKIN.";
     sendMail($_SESSION['email'], 'Confirmation de votre rendez-vous KAESKIN', $message);
+    redirect('../pages/rdv.php', 'success', 'Rendez-vous confirmé ! Un e-mail vous a été envoyé.');
+} elseif ($modePaiement === 'Paiement en ligne') {
+    if (!isset($_SESSION['panier'])) {
+        $_SESSION['panier'] = [];
+    }
+    $_SESSION['panier']['rdv_' . $idRdv] = [
+        'id' => 'rdv_' . $idRdv,
+        'name' => $service,
+        'type' => 'Rendez-vous',
+        'subtitle' => "Le $date à $heure avec $expertName",
+        'price' => $prix,
+        'quantity' => 1,
+        'image' => 'assets/images/services/droplet.svg',
+        'rdv_id' => $idRdv
+    ];
+    redirect('../pages/panier.php');
 }
-
-echo json_encode([
-    'success' => true,
-    'message' => 'Rendez-vous réservé.',
-    'id_rdv' => $idRdv,
-    'expert_name' => $expertName
-]);

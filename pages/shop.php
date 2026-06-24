@@ -10,14 +10,7 @@ require_once(__DIR__ . '/../includes/product_card.php');
 $isAdmin = false;
 
 if (isset($_SESSION['id_user'])) {
-    $stmt = $pdo->prepare('SELECT role FROM UTILISATEUR WHERE id_user = ?');
-    $stmt->execute([$_SESSION['id_user']]);
-    $currentUser = $stmt->fetch();
-
-    if ($currentUser && $currentUser['role'] === 'admin') {
-        $isAdmin = true;
-        $_SESSION['role'] = 'admin';
-    }
+    $isAdmin = isCurrentAdmin($pdo);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_product') {
@@ -82,6 +75,7 @@ $filteredProducts = $stmt->fetchAll();
                             <p class="font-hatton text-sm uppercase tracking-[0.3em]">Catalogue</p>
                             <h2 class="font-hatton text-3xl text-main">Produits disponibles</h2>
                         </div>
+                        <?php displayAlert(); ?>
                         <div class="w-full md:max-w-md">
                             <input type="search" id="shop-search" name="search" value="<?= htmlspecialchars($search) ?>"
                                 placeholder="Rechercher un produit"
@@ -111,15 +105,15 @@ $filteredProducts = $stmt->fetchAll();
 </main>
 
 <script>
-    let CART_STORAGE_KEY = 'kaeskin-cart';
-    let searchInput = document.getElementById('shop-search');
-    let productList = document.getElementById('product-list');
-    let searchEmpty = document.getElementById('search-empty');
+    const CART_STORAGE_KEY = 'kaeskin-cart';
+    const searchInput = document.getElementById('shop-search');
+    const productList = document.getElementById('product-list');
+    const searchEmpty = document.getElementById('search-empty');
 
     function getCart() {
         try {
-            let storedCart = localStorage.getItem(CART_STORAGE_KEY);
-            let parsedCart = storedCart ? JSON.parse(storedCart) : [];
+            const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+            const parsedCart = storedCart ? JSON.parse(storedCart) : [];
             return Array.isArray(parsedCart) ? parsedCart : [];
         } catch (error) {
             return [];
@@ -131,11 +125,16 @@ $filteredProducts = $stmt->fetchAll();
     }
 
     function addProductToCart(button) {
-        let article = button.closest('article');
-        let productQty = article.querySelector('.product-qty');
-        let cart = getCart();
-        let quantity = Math.max(1, Number(productQty.value));
-        let product = {
+        const article = button.closest('article');
+        if (!article) return;
+
+        const productQtyInput = article.querySelector('.product-qty');
+        const cart = getCart();
+        const quantity = Math.max(1, Number(productQtyInput.value));
+
+        const product = {
+            id: 'prod_' + button.dataset.id,
+            product_id: button.dataset.id,
             name: button.dataset.name,
             type: button.dataset.type,
             price: Number(button.dataset.price),
@@ -144,9 +143,7 @@ $filteredProducts = $stmt->fetchAll();
             image: button.dataset.image
         };
 
-        let existingItemIndex = cart.findIndex(function(item) {
-            return item.name === product.name;
-        });
+        const existingItemIndex = cart.findIndex(item => item.id === product.id);
 
         if (existingItemIndex >= 0) {
             cart[existingItemIndex].quantity += product.quantity;
@@ -155,41 +152,32 @@ $filteredProducts = $stmt->fetchAll();
         }
 
         saveCart(cart);
-        button.textContent = 'Ajouté';
-    }
-
-    function brancherBoutonsPanier() {
-        document.querySelectorAll('.add-product').forEach(function(button) {
-            button.addEventListener('click', function() {
-                addProductToCart(button);
-            });
-        });
+        button.textContent = 'Ajouté !';
+        setTimeout(() => {
+            button.textContent = 'Ajouter au panier';
+        }, 2000);
     }
 
     function chercherProduits() {
-        let search = searchInput.value;
+        const search = searchInput.value;
 
         fetch('../auth/recherche_shop.php?search=' + encodeURIComponent(search))
-            .then(function(response) {
-                return response.text();
-            })
-            .then(function(html) {
+            .then(response => response.text())
+            .then(html => {
                 productList.innerHTML = html;
-
-                if (html.trim() === '') {
-                    searchEmpty.classList.remove('hidden');
-                    return;
-                }
-
-                searchEmpty.classList.add('hidden');
-                brancherBoutonsPanier();
+                searchEmpty.classList.toggle('hidden', html.trim() !== '');
             });
     }
 
-    brancherBoutonsPanier();
+    productList.addEventListener('click', function(event) {
+        const button = event.target.closest('.add-product');
+        if (button) {
+            addProductToCart(button);
+        }
+    });
+
     searchInput.addEventListener('input', chercherProduits);
 </script>
-
 <?php
 include(__DIR__ . '/../headers/footer.php');
 ?>

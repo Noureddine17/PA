@@ -3,21 +3,9 @@ session_start();
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-if (!isset($_SESSION['id_user'])) {
-    redirect('../auth/login.php', 'error', 'Vous devez vous connecter.');
-}
+$currentRole = requireRole($pdo, ['client', 'admin', 'expert'], '../auth/login.php', 'client.php');
 
-$stmt = $pdo->prepare('SELECT id_user, role FROM UTILISATEUR WHERE id_user = ?');
-$stmt->execute([$_SESSION['id_user']]);
-$currentUser = $stmt->fetch();
-
-if (!$currentUser) {
-    redirect('../auth/login.php', 'error', 'Utilisateur introuvable.');
-}
-
-$_SESSION['role'] = $currentUser['role'];
-
-if ($currentUser['role'] === 'expert') {
+if ($currentRole === 'expert') {
     redirect('expert.php');
 }
 

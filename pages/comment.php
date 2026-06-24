@@ -40,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('comment.php?article=' . urlencode($slug));
     }
 
-    // Insert into DB
     try {
         $stmt = $pdo->prepare('INSERT INTO BLOG_COMMENT (article_slug, id_user, content) VALUES (?, ?, ?)');
         $stmt->execute([$slug, $_SESSION['id_user'], $comment]);

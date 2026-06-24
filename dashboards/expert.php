@@ -3,9 +3,7 @@ session_start();
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-if (!isset($_SESSION['id_user'])) {
-    redirect('../auth/login.php', 'error', 'Vous devez vous connecter.');
-}
+requireRole($pdo, ['expert', 'admin'], '../auth/login.php', 'client.php', 'Accès réservé aux experts.');
 
 $stmt = $pdo->prepare('SELECT id_user, nom, prenom, email, role FROM UTILISATEUR WHERE id_user = ?');
 $stmt->execute([$_SESSION['id_user']]);
@@ -13,12 +11,6 @@ $expert = $stmt->fetch();
 
 if (!$expert) {
     redirect('../auth/login.php', 'error', 'Utilisateur introuvable.');
-}
-
-$_SESSION['role'] = $expert['role'];
-
-if ($expert['role'] !== 'expert' && $expert['role'] !== 'admin') {
-    redirect('client.php', 'error', 'Accès réservé aux experts.');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

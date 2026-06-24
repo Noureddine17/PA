@@ -3,9 +3,6 @@ session_start();
 require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/../config/functions.php');
 
-$data = json_decode(file_get_contents('php://input'), true);
-
-
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,21 +24,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$user || !password_verify($password, $user['mot_de_passe'])) {
             $errors[] = 'Email ou mot de passe incorrect.';
+            logLoginAttempt(false, $email);
         } elseif (!$user['verif_email']) {
             $errors[] = 'Vous devez confirmer votre email avant de vous connecter.';
+            logLoginAttempt(false, $email);
         } else {
-            $_SESSION['user_id'] = $user['id_user'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_name'] = $user['prenom'] . ' ' . $user['nom'];
+            logLoginAttempt(true, $email);
+
             $_SESSION['id_user'] = $user['id_user'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['last_activity'] = time();
+            $_SESSION['prenom'] = $user['prenom'];
+            $_SESSION['nom'] = $user['nom'];
+
 
             redirect('../index.php', 'success', 'Connexion réussie.');
         }
     }
 }
+
+
 
 include(__DIR__ . '/../headers/header.php');
 ?>
