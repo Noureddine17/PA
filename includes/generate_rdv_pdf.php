@@ -56,7 +56,7 @@ $pdf->Cell(0, 7, mb_convert_encoding('Expert : ' . $rdv['expert_prenom'] . ' ' .
 $pdf->Cell(0, 7, mb_convert_encoding('Date : ' . $rdv['date_rdv'], 'ISO-8859-1', 'UTF-8'), 0, 1);
 $pdf->Cell(0, 7, mb_convert_encoding('Heure : ' . $heure, 'ISO-8859-1', 'UTF-8'), 0, 1);
 $pdf->Cell(0, 7, mb_convert_encoding('Durée : ' . $rdv['duree'], 'ISO-8859-1', 'UTF-8'), 0, 1);
-$pdf->Cell(0, 7, mb_convert_encoding('Prix : ' . number_format($rdv['prix'], 2, ',', '.') . ' €', 'ISO-8859-1', 'UTF-8'), 0, 1);
+$pdf->Cell(0, 7, mb_convert_encoding('Prix : ' . number_format($rdv['prix'], 2, ',', '.') . ' EUR', 'ISO-8859-1', 'UTF-8'), 0, 1);
 $pdf->Cell(0, 7, mb_convert_encoding('Mode de paiement : ' . $rdv['mode_paiement'], 'ISO-8859-1', 'UTF-8'), 0, 1);
 $pdf->Ln(10);
 
