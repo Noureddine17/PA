@@ -39,7 +39,7 @@ if (!$rdv) {
 
 $splithour = explode(':', $rdv['heure']);
 $heure = $splithour[0] . ':' . $splithour[1];
-$euro = chr(164);
+$euro = chr(168);
 
 $pdf = new FPDF();
 $pdf->AddPage();
