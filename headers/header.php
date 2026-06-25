@@ -20,6 +20,12 @@ $timeout = 5 * 60;
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
+// Update last activity timestamp for the logged-in user
+if (isset($_SESSION['id_user'])) {
+    $stmt = $pdo->prepare('UPDATE UTILISATEUR SET derniere_activite = NOW() WHERE id_user = ?');
+    $stmt->execute([$_SESSION['id_user']]);
+}
+
 // echo '<pre>';
 // print_r($_SESSION);
 // echo '</pre>';

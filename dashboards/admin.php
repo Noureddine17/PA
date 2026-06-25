@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $stmt = $pdo->query('
-    SELECT u.id_user, u.nom, u.prenom, u.email, u.role, u.verif_email, u.date_inscription, n.id_newsletter AS newsletter
+    SELECT u.id_user, u.nom, u.prenom, u.email, u.role, u.verif_email, u.date_inscription, u.derniere_activite, n.id_newsletter AS newsletter
     FROM UTILISATEUR u
     LEFT JOIN NEWSLETTER n ON n.id_user = u.id_user
     ORDER BY u.id_user DESC
@@ -76,6 +76,7 @@ include(__DIR__ . '/../headers/header.php');
                         <tr class="border-b border-[#CBB59D] text-left">
                             <th class="px-4 py-3">ID</th>
                             <th class="px-4 py-3">Nom</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3">Email</th>
                             <th class="px-4 py-3">Role</th>
                             <th class="px-4 py-3">Newsletter</th>
@@ -91,6 +92,19 @@ include(__DIR__ . '/../headers/header.php');
                             <tr class="border-b border-[#E8E2D9]">
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['id_user']) ?></td>
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['prenom'] . ' ' . $user['nom']) ?></td>
+                                <td class="px-4 py-3">
+                                    <?php
+                                    $isOnline = false;
+                                    if ($user['derniere_activite']) {
+                                        $lastActivity = strtotime($user['derniere_activite']);
+                                        $currentTime = time();
+                                        if (($currentTime - $lastActivity) < 300) { // 5 minutes
+                                            $isOnline = true;
+                                        }
+                                    }
+                                    ?>
+                                    <span class="inline-block h-3 w-3 rounded-full <?= $isOnline ? 'bg-green-500' : 'bg-red-500' ?>"></span>
+                                </td>
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['email']) ?></td>
                                 <td class="px-4 py-3"><?= htmlspecialchars($user['role']) ?></td>
                                 <td class="px-4 py-3"><?= $user['newsletter'] ? 'Oui' : 'Non' ?></td>

@@ -58,7 +58,6 @@ if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
                 </div>
 
                 <div id="cart-items" class="space-y-5">
-                    <!-- Le contenu du panier sera généré ici par JavaScript -->
                 </div>
                 <div id="cart-empty" class="hidden rounded-[32px] border border-dashed border-div bg-default p-8 text-center shadow-xl/10">
                     <p class="font-hatton text-sm uppercase tracking-[0.3em] mb-3">Panier vide</p>

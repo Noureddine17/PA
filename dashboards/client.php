@@ -97,15 +97,21 @@ include(__DIR__ . '/../headers/header.php');
                     <?php endif; ?>
 
                     <?php foreach ($rdvs as $rdv): ?>
-                        <a href="client.php?id_rdv=<?= htmlspecialchars($rdv['id_rdv']) ?>"
-                            class="block rounded-[28px] border border-[#CBB59D] px-5 py-4 font-hatton text-main <?= (int) $rdv['id_rdv'] === $selectedRdvId ? 'bg-button' : 'bg-[#EEE6DC]' ?>">
+                        <div
+                            class="rounded-[28px] border border-[#CBB59D] px-5 py-4 font-hatton text-main <?= (int) $rdv['id_rdv'] === $selectedRdvId ? 'bg-button' : 'bg-[#EEE6DC]' ?>">
                             <span class="block text-xl"><?= htmlspecialchars($rdv['expert_prenom'] . ' ' . $rdv['expert_nom']) ?></span>
                             <span class="block text-sm"><?= htmlspecialchars($rdv['service']) ?></span>
                             <span class="block text-sm"><?= htmlspecialchars($rdv['date_rdv'] . ' à ' . substr($rdv['heure'], 0, 5)) ?></span>
                             <span class="mt-2 inline-block rounded-full px-3 py-1 text-sm <?= $rdv['statut'] === 'annule' ? 'bg-red-50 text-red-700' : 'bg-[#DDEEDC] text-main' ?>">
                                 <?= $rdv['statut'] === 'annule' ? 'Annulé' : 'Confirmé' ?>
                             </span>
-                        </a>
+                            <div class="mt-3 flex gap-x-4">
+                                <a href="client.php?id_rdv=<?= htmlspecialchars($rdv['id_rdv']) ?>" class="underline hover:no-underline">Voir le chat</a>
+                                <?php if ($rdv['mode_paiement'] === 'Paiement sur place' && $rdv['statut'] !== 'annule'): ?>
+                                    <a href="../includes/generate_rdv_pdf.php?id_rdv=<?= htmlspecialchars($rdv['id_rdv']) ?>" target="_blank" class="underline hover:no-underline">Télécharger PDF</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 </div>
             </aside>
