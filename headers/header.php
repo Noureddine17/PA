@@ -5,17 +5,16 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $timeout = 5 * 60; 
 
-// if (isset($_SESSION['id_user'])) {
-//     if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
-//         session_unset();
-//         session_destroy();
+if (isset($_SESSION['id_user'])) {
+     if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
+         session_unset();
+         session_destroy();
 
-//         header('Location: /auth/login.php?error=session_expired');
-//         exit;
-//     }
-
-//     $_SESSION['last_activity'] = time();
-// }
+         header('Location: /auth/login.php?error=session_expired');
+         exit;
+     }
+     $_SESSION['last_activity'] = time();
+}
 
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
@@ -37,7 +36,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = 'http://localhost/PA';
+$baseUrl = '';
 
 function url($path)
 {
@@ -57,7 +56,10 @@ if ($currentRole === 'admin') {
     $dashboardLink = 'dashboards/expert.php';
 }
 $dashboardPage = basename($dashboardLink);
-$userName = $_SESSION['prenom'].' '.$_SESSION['nom'];
+$userName = '';
+if ($isConnected && isset($_SESSION['prenom'], $_SESSION['nom'])) {
+    $userName = trim($_SESSION['prenom'] . ' ' . $_SESSION['nom']);
+}
 $alert = getAlert();
 ?>
 
