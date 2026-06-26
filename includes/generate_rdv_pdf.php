@@ -4,8 +4,8 @@ require_once(__DIR__ . '/../config/connexion.php');
 require_once(__DIR__ . '/fpdf19/fpdf.php');
 
 if (!isset($_GET['id_rdv']) || !is_numeric($_GET['id_rdv'])) {
-    header('Location: ../pages/rdv.php');
-    exit;
+    require_once(__DIR__ . '/../config/functions.php');
+    redirect('../pages/rdv.php');
 }
 
 $idRdv = (int)$_GET['id_rdv'];
@@ -33,8 +33,8 @@ $stmt->execute([$idRdv]);
 $rdv = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$rdv) {
-    header('Location: ../pages/rdv.php');
-    exit;
+    require_once(__DIR__ . '/../config/functions.php');
+    redirect('../pages/rdv.php');
 }
 
 $splithour = explode(':', $rdv['heure']);

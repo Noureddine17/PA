@@ -3,23 +3,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$timeout = 5 * 60; 
-
-if (isset($_SESSION['id_user'])) {
-     if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
-         session_unset();
-         session_destroy();
-
-         header('Location: /auth/login.php?error=session_expired');
-         exit;
-     }
-     $_SESSION['last_activity'] = time();
-}
-
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-// Update last activity timestamp for the logged-in user
+$timeout = 5 * 60; 
+
+if (isset($_SESSION['id_user'])) {
+    if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
+        session_unset();
+        session_destroy();
+
+        redirect('/PA/auth/login.php', 'error', 'Session expirée.');
+    }
+    $_SESSION['last_activity'] = time();
+}
+
 if (isset($_SESSION['id_user'])) {
     $stmt = $pdo->prepare('UPDATE UTILISATEUR SET derniere_activite = NOW() WHERE id_user = ?');
     $stmt->execute([$_SESSION['id_user']]);
@@ -36,7 +34,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = '';
+$baseUrl = 'http://localhost/PA';
 
 function url($path)
 {
