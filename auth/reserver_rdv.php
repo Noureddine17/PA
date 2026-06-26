@@ -67,10 +67,10 @@ if ($rdvExiste) {
 
 try {
     $stmt = $pdo->prepare('
-        INSERT INTO RENDEZ_VOUS (id_client, id_expert, service, date_rdv, heure, duree, prix, mode_paiement)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO RENDEZ_VOUS (id_client, id_expert, service, date_rdv, heure, duree, prix, mode_paiement, statut)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ');
-    $stmt->execute([$idClient, $idExpert, $service, $date, $heure, $duree, $prix, $modePaiement]);
+    $stmt->execute([$idClient, $idExpert, $service, $date, $heure, $duree, $prix, $modePaiement, 'confirme']);
     $idRdv = (int)$pdo->lastInsertId();
 } catch (PDOException $e) {
     if ($e->getCode() === '23000') {

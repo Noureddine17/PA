@@ -36,19 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $comment = trim($_POST['comment'] ?? '');
     if ($comment === '') {
-        $_SESSION['alert'] = ['type' => 'error', 'message' => 'Le commentaire ne peut pas être vide.'];
-        redirect('comment.php?article=' . urlencode($slug));
+        redirect('comment.php?article=' . urlencode($slug), 'error', 'Le commentaire ne peut pas être vide.');
     }
 
     try {
         $stmt = $pdo->prepare('INSERT INTO BLOG_COMMENT (article_slug, id_user, content) VALUES (?, ?, ?)');
         $stmt->execute([$slug, $_SESSION['id_user'], $comment]);
-        $_SESSION['alert'] = ['type' => 'success', 'message' => 'Commentaire ajouté.'];
+        redirect('blog.php?article=' . urlencode($slug) . '#post-' . urlencode($slug), 'success', 'Commentaire ajouté.');
     } catch (Exception $e) {
-        $_SESSION['alert'] = ['type' => 'error', 'message' => 'Erreur lors de l\'enregistrement du commentaire.'];
+        redirect('blog.php?article=' . urlencode($slug) . '#post-' . urlencode($slug), 'error', 'Erreur lors de l\'enregistrement du commentaire.');
     }
-
-    redirect('blog.php?article=' . urlencode($slug) . '#post-' . urlencode($slug));
 }
 
 include(__DIR__ . '/../headers/header.php');

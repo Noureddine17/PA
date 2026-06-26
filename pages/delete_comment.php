@@ -27,21 +27,17 @@ try {
     $row = $stmt->fetch();
 
     if (!$row) {
-        $_SESSION['alert'] = ['type' => 'error', 'message' => 'Commentaire introuvable.'];
-        redirect('blog.php');
+        redirect('blog.php', 'error', 'Commentaire introuvable.');
     }
 
     if ($row['id_user'] != $_SESSION['id_user']) {
-        $_SESSION['alert'] = ['type' => 'error', 'message' => 'Vous n\'avez pas les droits pour supprimer ce commentaire.'];
-        redirect('blog.php?article=' . urlencode($row['article_slug']) . '#post-' . urlencode($row['article_slug']));
+        redirect('blog.php?article=' . urlencode($row['article_slug']) . '#post-' . urlencode($row['article_slug']), 'error', 'Vous n\'avez pas les droits pour supprimer ce commentaire.');
     }
 
     $del = $pdo->prepare('DELETE FROM BLOG_COMMENT WHERE id_comment = ?');
     $del->execute([$commentId]);
 
-    $_SESSION['alert'] = ['type' => 'success', 'message' => 'Commentaire supprimé.'];
-    redirect('blog.php?article=' . urlencode($row['article_slug']) . '#post-' . urlencode($row['article_slug']));
+    redirect('blog.php?article=' . urlencode($row['article_slug']) . '#post-' . urlencode($row['article_slug']), 'success', 'Commentaire supprimé.');
 } catch (Exception $e) {
-    $_SESSION['alert'] = ['type' => 'error', 'message' => 'Erreur lors de la suppression.'];
-    redirect('blog.php');
+    redirect('blog.php', 'error', 'Erreur lors de la suppression.');
 }
