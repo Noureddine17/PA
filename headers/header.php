@@ -34,7 +34,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = 'http://localhost/PA';
+$baseUrl = '';
 
 function url($path)
 {
