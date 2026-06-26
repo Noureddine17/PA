@@ -1,6 +1,11 @@
 <?php
 include(__DIR__ . '/../headers/header.php');
 
+
+$isConnected = isset($_SESSION['id_user']);
+
+
+
 // Gérer l'annulation d'un RDV (action serveur)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'annuler_rdv') {
     if (isset($_SESSION['id_user'])) {
@@ -99,12 +104,20 @@ if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
                             <span class="font-hatton text-main text-2xl" id="summary-total">0,00 €</span>
                         </div>
                     </div>
+                    
 
-                    <button type="button" id="checkout-button"
-                        class="w-full rounded-full bg-button px-6 py-4 font-hatton text-main transition-all duration-300 hover:scale-105 hover:!bg-[#E8E2D9] hover:!text-[#B09882] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
-                        disabled>
-                        Continuer vers le paiement
-                    </button>
+                    <?php if ($isConnected): ?>
+                        <button type="button" id="checkout-button"
+                            class="w-full rounded-full bg-button px-6 py-4 font-hatton text-main transition-all duration-300 hover:scale-105 hover:!bg-[#E8E2D9] hover:!text-[#B09882] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+                            disabled>
+                            Continuer vers le paiement
+                        </button>
+                    <?php else: ?>
+                        <a href="<?= url('auth/login.php') ?>"
+                            class="w-full rounded-full bg-button px-6 py-4 font-hatton text-main transition-all duration-300 hover:scale-105 hover:!bg-[#E8E2D9] hover:!text-[#B09882]">
+                            Se connecter pour continuer
+                        </a>
+                    <?php endif; ?>
                 </div>
 
 
@@ -230,10 +243,10 @@ if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
 		const totalItems = fullCart.reduce((sum, item) => sum + item.quantity, 0);
 		const subtotal = fullCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-		summaryItems.textContent = totalItems;
-		summarySubtotal.textContent = formatPrice(subtotal);
-		summaryTotal.textContent = formatPrice(subtotal);
-		checkoutButton.disabled = fullCart.length === 0;
+        summaryItems.textContent = totalItems;
+        summarySubtotal.textContent = formatPrice(subtotal);
+        summaryTotal.textContent = formatPrice(subtotal);
+        if (checkoutButton) checkoutButton.disabled = fullCart.length === 0;
 	}
 
 	cartItemsContainer.addEventListener('click', (event) => {
@@ -243,11 +256,16 @@ if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
 		}
 	});
 
-	checkoutButton.addEventListener('click', () => {
-		if (!checkoutButton.disabled) {
-			window.location.href = 'paiement.php';
-		}
-	});
+    if (checkoutButton) {
+        checkoutButton.addEventListener('click', () => {
+            if (!checkoutButton.disabled) {
+                const productCart = getProductCart();
+                const fullCart = [...appointmentsFromSession, ...productCart];
+                const subtotal = fullCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                window.location.href = `paiement.php?total=${subtotal.toFixed(2)}`;
+            }
+        });
+    }
 
 	document.addEventListener('DOMContentLoaded', () => {
 		renderCart();
