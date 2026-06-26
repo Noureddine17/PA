@@ -67,7 +67,7 @@ $totalFormatted = number_format($totalFloat, 2, ',', ' ') . ' €';
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		// Clé publique de test de Stripe. Remplacez-la par votre propre clé de test.
-		const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTtrg7HW');
+		const stripe = Stripe('pk_test_51TmYowHHncBXtuj2RK7o8p4qvMMn3f4s4IuhBX3BAbwOedUE9bIUk6wgyi9BG42H7acf1w9tBTyPnhZDlczriEJV00UF7GRqpe');
 
 		const elements = stripe.elements({
 			locale: 'fr',
