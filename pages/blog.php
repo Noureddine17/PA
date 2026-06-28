@@ -15,6 +15,12 @@ if (isset($_SESSION['id_user'])) {
     }
 }
 
+$isAdmin = false;
+if (isset($_SESSION['id_user'])) {
+    // Vérifie si l'utilisateur est un admin
+    $isAdmin = isCurrentAdmin($pdo);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['like_article'])) {
     if (!isset($_SESSION['id_user'])) {
         redirect('../auth/login.php', 'error', 'Vous devez vous connecter pour liker un article.');
@@ -177,7 +183,7 @@ include(__DIR__ . '/../headers/header.php');
                                             <span class="text-sm text-gray-600"><?= date('d/m/Y H:i', strtotime($comment['created_at'])) ?></span>
                                         </div>
                                         <p class="font-hatton"><?= htmlspecialchars($comment['contenu']) ?></p>
-                                        <div class="mt-4 flex items-center justify-between">
+                                        <div class="mt-4 flex items-center gap-4">
                                             <form action="like_comment.php" method="post" class="inline">
                                                 <input type="hidden" name="comment_id" value="<?= $comment['id_comment'] ?>">
                                                 <input type="hidden" name="article_id" value="<?= $selectedArticle['id_article'] ?>">
@@ -186,6 +192,12 @@ include(__DIR__ . '/../headers/header.php');
                                                     <span><?= $commentLikeCounts[$comment['id_comment']] ?? 0 ?></span>
                                                 </button>
                                             </form>
+                                            <?php if (isset($_SESSION['id_user']) && ($_SESSION['id_user'] == $comment['id_user'] || $isAdmin)): ?>
+                                                <form action="delete_comment.php" method="post" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');">
+                                                    <input type="hidden" name="comment_id" value="<?= $comment['id_comment'] ?>">
+                                                    <button type="submit" class="text-sm text-red-600 hover:underline font-hatton">Supprimer</button>
+                                                </form>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
