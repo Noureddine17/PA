@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 requireLogin();
 
 $idClient = (int)$_SESSION['id_user'];
+$currentRole = getCurrentRole($pdo);
 $idExpert = (int)($_POST['expert'] ?? 0);
 $service = trim($_POST['service'] ?? '');
 $date = trim($_POST['date'] ?? '');
@@ -33,6 +34,10 @@ if ($idExpert <= 0 || $service === '' || $duree === '' || $prix <= 0 || $modePai
 
 if (!$dateChoisie || $dateChoisie->format('Y-m-d') !== $date) {
     redirect('../pages/rdv.php', 'error', 'Date ou horaire invalide.');
+}
+
+if ($currentRole === 'expert' && $idExpert === $idClient) {
+    redirect('../pages/rdv.php', 'error', 'Un expert ne peut pas réserver un rendez-vous avec lui-même.');
 }
 
 $stmt = $pdo->prepare('SELECT id_creneau FROM CRENEAU_RDV WHERE heure = ? AND actif = 1 LIMIT 1');
@@ -83,8 +88,12 @@ $expertName = trim($expert['prenom'] . ' ' . $expert['nom']);
 
 if ($modePaiement === 'Paiement sur place') {
     $message = "Bonjour,\n\nVotre rendez-vous KAESKIN est confirmé.\n\nSoin : $service\nExpert : $expertName\nDate : $date\nHeure : $heure\nDurée : $duree\nPrix : $prixLabel\nPaiement : sur place\n\nA bientôt chez KAESKIN.";
-    sendMail($_SESSION['email'], 'Confirmation de votre rendez-vous KAESKIN', $message);
-    redirect('../pages/rdv.php', 'success', 'Rendez-vous confirmé ! Un e-mail vous a été envoyé.');
+    
+    if (sendMail($_SESSION['email'], 'Confirmation de votre rendez-vous KAESKIN', $message)) {
+        redirect('../pages/rdv.php', 'success', 'Rendez-vous confirmé ! Un e-mail de confirmation vous a été envoyé.');
+    } else {
+        redirect('../pages/rdv.php', 'success', 'Rendez-vous confirmé, mais l\'envoi de l\'e-mail de confirmation a échoué. Veuillez vérifier vos informations ou nous contacter.');
+    }
 } elseif ($modePaiement === 'Paiement en ligne') {
     if (!isset($_SESSION['panier'])) {
         $_SESSION['panier'] = [];
