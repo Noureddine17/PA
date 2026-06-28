@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = bin2hex(random_bytes(32));
             
             $expiresAt = date('Y-m-d H:i:s', time() + 3600);
-            $stmt = $pdo->prepare('UPDATE UTILISATEUR SET token_reset = ?, token_reset_expires = ? WHERE id_user = ?');
+            $stmt = $pdo->prepare('UPDATE UTILISATEUR SET reset_token = ?, reset_token_expires_at = ? WHERE id_user = ?');
             $stmt->execute([$token, $expiresAt, $user['id_user']]);
 
             $resetLink = 'https://' . $_SERVER['HTTP_HOST'] . '/PA/auth/reset_password.php?token=' . $token;
