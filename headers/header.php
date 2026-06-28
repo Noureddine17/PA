@@ -29,7 +29,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = '/' . basename(dirname(__DIR__));
+$baseUrl = '';
 
 function url($path)
 {
