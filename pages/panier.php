@@ -18,9 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $stmt->execute([$rdvId, $idClient]);
 
                 if ($stmt->rowCount() > 0) {
-                    // On retire le RDV de la session et on redirige pour rafraîchir
-                    unset($_SESSION['panier']['rdv_' . $rdvId]); // Clé exacte utilisée lors de l'ajout
-                    redirect('panier.php', 'success', 'Rendez-vous annulé et créneau libéré.'); // La redirection va recharger la page
+                    unset($_SESSION['panier']['rdv_' . $rdvId]);
+                    redirect('panier.php', 'success', 'Rendez-vous annulé et créneau libéré.');
                 } else {
                     redirect('panier.php', 'error', 'Impossible de trouver ou de supprimer ce rendez-vous.');
                 }
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Récupérer uniquement les rendez-vous de la session pour les passer au JS
 $appointmentsFromSession = [];
 if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
     foreach ($_SESSION['panier'] as $item) {

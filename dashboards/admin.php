@@ -98,7 +98,7 @@ include(__DIR__ . '/../headers/header.php');
                                     if ($user['derniere_activite']) {
                                         $lastActivity = strtotime($user['derniere_activite']);
                                         $currentTime = time();
-                                        if (($currentTime - $lastActivity) < 300) { // 5 minutes
+                                        if (($currentTime - $lastActivity) < 300) {
                                             $isOnline = true;
                                         }
                                     }

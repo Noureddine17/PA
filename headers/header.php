@@ -23,18 +23,13 @@ if (isset($_SESSION['id_user'])) {
     $stmt->execute([$_SESSION['id_user']]);
 }
 
-// echo '<pre>';
-// print_r($_SESSION);
-// echo '</pre>';
-
-
 function currentPage()
 {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     return basename($path ?: '');
 }
 
-$baseUrl = '';
+$baseUrl = '/' . basename(dirname(__DIR__));
 
 function url($path)
 {
