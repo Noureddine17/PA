@@ -9,37 +9,53 @@ $dossierCaptcha = __DIR__ . '/../assets/images/captcha/';
 $extensionsAutorisees = ['jpg', 'jpeg', 'png', 'webp'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $image = $_FILES['captcha_image'] ?? null;
+    if (isset($_POST['action']) && $_POST['action'] === 'delete_captcha') {
+        $imageName = $_POST['image_name'] ?? '';
+        if (empty($imageName)) {
+            redirect('captcha.php', 'error', 'Nom d\'image manquant.');
+        }
 
-    if (!$image || $image['error'] !== UPLOAD_ERR_OK) {
-        redirect('captcha.php', 'error', 'Veuillez choisir une image.');
+        $imagePath = $dossierCaptcha . basename($imageName);
+
+        if (file_exists($imagePath) && is_writable($dossierCaptcha)) {
+            unlink($imagePath);
+            redirect('captcha.php', 'success', 'Image du captcha supprimée.');
+        } else {
+            redirect('captcha.php', 'error', 'Impossible de supprimer l\'image ou image introuvable.');
+        }
+    } else {
+        $image = $_FILES['captcha_image'] ?? null;
+
+        if (!$image || $image['error'] !== UPLOAD_ERR_OK) {
+            redirect('captcha.php', 'error', 'Veuillez choisir une image.');
+        }
+
+        $extension = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($extension, $extensionsAutorisees, true)) {
+            redirect('captcha.php', 'error', 'Format refusé. Utilisez JPG, PNG ou WEBP.');
+        }
+
+        $typeImage = mime_content_type($image['tmp_name']);
+        $typesAutorises = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!in_array($typeImage, $typesAutorises, true)) {
+            redirect('captcha.php', 'error', 'Le fichier envoyé doit être une vraie image.');
+        }
+
+        if (!is_dir($dossierCaptcha)) {
+            mkdir($dossierCaptcha, 0755, true);
+        }
+
+        $nomFichier = 'captcha-' . date('Ymd-His') . '-' . random_int(1000, 9999) . '.' . $extension;
+        $cheminFinal = $dossierCaptcha . $nomFichier;
+
+        if (!move_uploaded_file($image['tmp_name'], $cheminFinal)) {
+            redirect('captcha.php', 'error', 'Impossible d’enregistrer l’image.');
+        }
+
+        redirect('captcha.php', 'success', 'Image ajoutée au captcha.');
     }
-
-    $extension = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
-
-    if (!in_array($extension, $extensionsAutorisees, true)) {
-        redirect('captcha.php', 'error', 'Format refusé. Utilisez JPG, PNG ou WEBP.');
-    }
-
-    $typeImage = mime_content_type($image['tmp_name']);
-    $typesAutorises = ['image/jpeg', 'image/png', 'image/webp'];
-
-    if (!in_array($typeImage, $typesAutorises, true)) {
-        redirect('captcha.php', 'error', 'Le fichier envoyé doit être une vraie image.');
-    }
-
-    if (!is_dir($dossierCaptcha)) {
-        mkdir($dossierCaptcha, 0755, true);
-    }
-
-    $nomFichier = 'captcha-' . date('Ymd-His') . '-' . random_int(1000, 9999) . '.' . $extension;
-    $cheminFinal = $dossierCaptcha . $nomFichier;
-
-    if (!move_uploaded_file($image['tmp_name'], $cheminFinal)) {
-        redirect('captcha.php', 'error', 'Impossible d’enregistrer l’image.');
-    }
-
-    redirect('captcha.php', 'success', 'Image ajoutée au captcha.');
 }
 
 $images = glob($dossierCaptcha . '*.{jpg,jpeg,png,webp}', GLOB_BRACE);
@@ -76,8 +92,19 @@ include(__DIR__ . '/../headers/header.php');
             <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
                 <?php foreach ($images as $image): ?>
                     <?php $nomImage = basename($image); ?>
-                    <img src="<?= url('assets/images/captcha/' . $nomImage) ?>" alt="Image captcha"
-                        class="h-32 w-full rounded-[20px] border border-[#CBB59D] object-cover">
+                    <div class="group relative">
+                        <img src="<?= url('assets/images/captcha/' . $nomImage) ?>" alt="Image captcha"
+                            class="h-32 w-full rounded-[20px] border border-[#CBB59D] object-cover">
+                        <form action="captcha.php" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer cette image ?');"
+                            class="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            <input type="hidden" name="action" value="delete_captcha">
+                            <input type="hidden" name="image_name" value="<?= htmlspecialchars($nomImage) ?>">
+                            <button type="submit" aria-label="Supprimer l'image"
+                                class="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-lg font-bold text-white shadow-md transition-transform hover:scale-110">
+                                &times;
+                            </button>
+                        </form>
+                    </div>
                 <?php endforeach; ?>
 
                 <?php if (empty($images)): ?>
