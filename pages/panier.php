@@ -1,21 +1,20 @@
 <?php
-include(__DIR__ . '/../headers/header.php');
-
-
-$isConnected = isset($_SESSION['id_user']);
-
-
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once(__DIR__ . '/../config/functions.php');
+require_once(__DIR__ . '/../config/connexion.php');
+ 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'annuler_rdv') {
     if (isset($_SESSION['id_user'])) {
         $rdvId = (int)($_POST['rdv_id'] ?? 0);
         $idClient = (int)$_SESSION['id_user'];
-
+ 
         if ($rdvId > 0) {
             try {
                 $stmt = $pdo->prepare('DELETE FROM RENDEZ_VOUS WHERE id_rdv = ? AND id_client = ?');
                 $stmt->execute([$rdvId, $idClient]);
-
+ 
                 if ($stmt->rowCount() > 0) {
                     unset($_SESSION['panier']['rdv_' . $rdvId]);
                     redirect('panier.php', 'success', 'Rendez-vous annulé et créneau libéré.');
@@ -31,7 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         redirect('../auth/login.php', 'error', 'Vous devez être connecté.');
     }
 }
-
+ 
+include(__DIR__ . '/../headers/header.php');
+ 
+$isConnected = isset($_SESSION['id_user']);
+ 
 $appointmentsFromSession = [];
 if (isset($_SESSION['panier']) && is_array($_SESSION['panier'])) {
     foreach ($_SESSION['panier'] as $item) {
