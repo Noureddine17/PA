@@ -14,6 +14,13 @@ if (!isset($_SESSION['id_user'])) {
     redirect('../auth/login.php', 'error', 'Vous devez vous connecter pour commenter.');
 }
 
+$stmtUser = $pdo->prepare('SELECT is_banned FROM UTILISATEUR WHERE id_user = ?');
+$stmtUser->execute([$_SESSION['id_user']]);
+$user = $stmtUser->fetch();
+if ($user && $user['is_banned']) {
+    redirect('blog.php', 'error', 'Vous êtes banni et ne pouvez pas commenter.');
+}
+
 $articleId = (int)($_POST['article_id'] ?? 0);
 $contenu = trim($_POST['contenu'] ?? '');
 
