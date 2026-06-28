@@ -22,8 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sentCount = 0;
     foreach ($subscribers as $email) {
-        // On utilise la fonction sendMail existante pour envoyer du texte simple,
-        // comme pour les autres emails de l'application.
         if (sendMail($email, $sujet, $message)) {
             $sentCount++;
         }
