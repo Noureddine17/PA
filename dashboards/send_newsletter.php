@@ -20,7 +20,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('send_newsletter.php', 'success', 'Aucun abonné à la newsletter à qui envoyer des emails.');
     }
 
-    $messageHtml = '<html><body>' . nl2br(htmlspecialchars($message)) . '</body></html>';
+    $messageBody = nl2br(htmlspecialchars($message));
+    $htmlSujet = htmlspecialchars($sujet);
+
+    $messageHtml = <<<HTML
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>$htmlSujet</title>
+    <style>
+        body { font-family: sans-serif; color: #333; line-height: 1.6; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        $messageBody
+    </div>
+</body>
+</html>
+HTML;
 
     $sentCount = 0;
     foreach ($subscribers as $email) {
