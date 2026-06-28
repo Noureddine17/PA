@@ -68,7 +68,13 @@ include(__DIR__ . '/../headers/header.php');
                     <h1 class="font-hatton text-main text-4xl md:text-5xl leading-none mb-4">Réinitialiser le mot de passe</h1>
                 </header>
 
-                <?php displayAlerts($errors, 'error'); ?>
+                <?php if (!empty($errors)): ?>
+                    <div class="mb-6 rounded-[20px] border border-red-200 bg-red-50 px-5 py-4">
+                        <?php foreach ($errors as $error): ?>
+                            <p class="font-hatton text-red-700 text-sm"><?= htmlspecialchars($error) ?></p>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($showForm): ?>
                     <form action="reset_password.php?token=<?= htmlspecialchars($token) ?>" method="post" class="space-y-5">
