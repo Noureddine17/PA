@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('UPDATE UTILISATEUR SET reset_token = ?, reset_token_expires_at = ? WHERE id_user = ?');
             $stmt->execute([$token, $expiresAt, $user['id_user']]);
 
-            $resetLink = 'https://' . $_SERVER['HTTP_HOST'] . '/PA/auth/reset_password.php?token=' . $token;
+            $resetLink = 'https://' . $_SERVER['HTTP_HOST'] . '/auth/reset_password.php?token=' . $token;
 
             $subject = 'Réinitialiser votre mot de passe KAESKIN';
             $messageBody = "Bonjour " . htmlspecialchars($user['prenom']) . ",\n\n";
