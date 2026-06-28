@@ -17,18 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user) {
-            // Générer un token unique
             $token = bin2hex(random_bytes(32));
             
-            // Stocker le token en base de données (expiration: 1 heure)
             $expiresAt = date('Y-m-d H:i:s', time() + 3600);
             $stmt = $pdo->prepare('UPDATE UTILISATEUR SET token_reset = ?, token_reset_expires = ? WHERE id_user = ?');
             $stmt->execute([$token, $expiresAt, $user['id_user']]);
 
-            // Créer le lien de réinitialisation
             $resetLink = 'https://' . $_SERVER['HTTP_HOST'] . '/PA/auth/reset_password.php?token=' . $token;
 
-            // Envoyer l'email
             $subject = 'Réinitialiser votre mot de passe KAESKIN';
             $messageBody = "Bonjour " . htmlspecialchars($user['prenom']) . ",\n\n";
             $messageBody .= "Vous avez demandé une réinitialisation de mot de passe.\n";
@@ -42,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = true;
             $message = 'Un email de réinitialisation a été envoyé à votre adresse.';
         } else {
-            // Pour des raisons de sécurité, ne pas révéler si l'email existe ou pas
             $success = true;
             $message = 'Si cet email existe, un lien de réinitialisation a été envoyé.';
         }
