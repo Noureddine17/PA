@@ -8,7 +8,6 @@ $errors = [];
 $message = '';
 $isValid = false;
 
-// Vérifier le token
 if (!empty($token)) {
     $stmt = $pdo->prepare('SELECT id_user, email FROM UTILISATEUR WHERE token_reset = ? AND token_reset_expires > NOW()');
     $stmt->execute([$token]);
@@ -23,7 +22,6 @@ if (!empty($token)) {
     $message = 'Lien de réinitialisation invalide.';
 }
 
-// Traiter le formulaire de réinitialisation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isValid && !empty($token)) {
     $newPassword = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -37,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isValid && !empty($token)) {
     }
 
     if (empty($errors)) {
-        // Hasher et mettre à jour le mot de passe
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare('UPDATE UTILISATEUR SET mot_de_passe = ?, token_reset = NULL, token_reset_expires = NULL WHERE id_user = ?');
         $stmt->execute([$hashedPassword, $user['id_user']]);
