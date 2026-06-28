@@ -6,9 +6,25 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
+if (isset($_SESSION['id_user'])) {
+    $stmtUser = $pdo->prepare('SELECT is_banned FROM UTILISATEUR WHERE id_user = ?');
+    $stmtUser->execute([$_SESSION['id_user']]);
+    $user = $stmtUser->fetch();
+    if ($user && $user['is_banned']) {
+        redirect('../index.php', 'error', 'Vous avez été banni et ne pouvez plus accéder au blog.');
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['like_article'])) {
     if (!isset($_SESSION['id_user'])) {
         redirect('../auth/login.php', 'error', 'Vous devez vous connecter pour liker un article.');
+    }
+
+    $stmtUser = $pdo->prepare('SELECT is_banned FROM UTILISATEUR WHERE id_user = ?');
+    $stmtUser->execute([$_SESSION['id_user']]);
+    $user = $stmtUser->fetch();
+    if ($user && $user['is_banned']) {
+        redirect('blog.php', 'error', 'Vous êtes banni et ne pouvez pas effectuer cette action.');
     }
 
     $articleId = (int)$_POST['article_id'] ?? 0;
