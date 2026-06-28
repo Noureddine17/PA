@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(__DIR__ . '/../config/functions.php');
 require_once(__DIR__ . '/../config/connexion.php');
 
-$timeout = 5 * 60; 
+$timeout = 5 * 60;
 
 if (isset($_SESSION['id_user'])) {
     if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > $timeout) {
@@ -29,7 +29,7 @@ function currentPage()
     return basename($path ?: '');
 }
 
-$baseUrl = '';
+$baseUrl = 'http://localhost/PA';
 
 function url($path)
 {
@@ -75,7 +75,7 @@ $alert = getAlert();
         <div class="container mx-auto px-4 py-1">
             <div class="flex min-h-16 items-center justify-between gap-4 px-1 sm:px-4">
                 <div class="flex items-center">
-                    <a href="<?= url('index.php') ?>" class="font-hatton text-2xl font-bold ">KAESKIN</a>
+                    <a href="<?= url('/') ?>" id="easter-egg" class="font-hatton text-2xl font-bold ">KAESKIN</a>
                 </div>
 
                 <button type="button" id="menu-mobile-button"
@@ -146,4 +146,26 @@ $alert = getAlert();
                 boutonMenuMobile.setAttribute('aria-expanded', String(!menuOuvert));
             });
         }
+            
+    
+    </script>
+    <script>
+        const link = document.getElementById('easter-egg');
+        let clicks = 0;
+        let timer = null;
+
+        link.addEventListener('click', (e) => {
+        e.preventDefault();
+        clicks++;
+
+        clearTimeout(timer);
+        timer = setTimeout(() => { clicks = 0; }, 2000);
+
+        if (clicks >= 24) {
+            clicks = 0;
+            alert('Easter Egg activé !');
+        window.open('https://www.youtube.com/watch?v=b8CfWF6IWjQ&t=3s', '_blank');
+        }
+        });
+
     </script>

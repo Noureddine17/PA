@@ -6,7 +6,6 @@ $isConnected = isset($_SESSION['id_user']);
 
 
 
-// Gérer l'annulation d'un RDV (action serveur)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'annuler_rdv') {
     if (isset($_SESSION['id_user'])) {
         $rdvId = (int)($_POST['rdv_id'] ?? 0);

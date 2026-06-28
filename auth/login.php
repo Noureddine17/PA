@@ -98,8 +98,8 @@ include(__DIR__ . '/../headers/header.php');
                         </div>
 
                         <div class="flex justify-end">
-                            <a href="#"
-                                class="font-hatton text-sm text-[#B7A28D] transition-colors">
+                            <a href="forgot_password.php"
+                                class="font-hatton text-sm text-[#B7A28D] transition-colors hover:text-main">
                                 Mot de passe oublié ?
                             </a>
                         </div>

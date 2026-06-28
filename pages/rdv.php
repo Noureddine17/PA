@@ -1,23 +1,31 @@
 <?php
 include(__DIR__ . '/../headers/header.php');
+require_once(__DIR__ . '/../config/connexion.php');
 
 $isConnected = isset($_SESSION['id_user']);
+$currentRole = $isConnected ? getCurrentRole($pdo) : null;
+$currentUserId = $isConnected ? (int) $_SESSION['id_user'] : 0;
 
-$stmtExperts = $pdo->query("
-    SELECT id_user, prenom, nom
-    FROM UTILISATEUR
-    WHERE role = 'expert'
-    ORDER BY prenom, nom
+$stmtExperts = $pdo->prepare("
+        SELECT id_user, prenom, nom
+        FROM UTILISATEUR
+        WHERE role = 'expert'
+            AND (? = 0 OR id_user <> ?)
+        ORDER BY prenom, nom
 ");
+$stmtExperts->execute([$currentRole === 'expert' ? $currentUserId : 0, $currentUserId]);
 $experts = $stmtExperts->fetchAll();
 $firstExpertName = empty($experts) ? 'Aucun expert' : trim($experts[0]['prenom'] . ' ' . $experts[0]['nom']);
+
+$stmtSoins = $pdo->query('SELECT id_soin, libelle, description, duree, prix FROM SOIN ORDER BY id_soin DESC');
+$soins = $stmtSoins->fetchAll();
 ?>
 
 <main class="pb-12 md:pb-20">
    
 
     <section class="container mx-auto px-3 pt-6 sm:px-4 md:pt-12">
-        <div class="grid gap-6 xl:grid-cols-[1.35fr_0.65fr] xl:gap-8">
+        <div class="grid gap-6">
             <form id="rdv-form" action="../auth/reserver_rdv.php" method="POST" class="bg-[#F5F2ED] border border-div rounded-[28px] p-4 shadow-xl/20 sm:rounded-[40px] sm:p-6 md:rounded-[56px] md:p-10">
                 <div class="mb-8 md:mb-10">
                     <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -29,38 +37,24 @@ $firstExpertName = empty($experts) ? 'Aucun expert' : trim($experts[0]['prenom']
                     </div>
 
                     <div class="grid gap-3 md:grid-cols-3 md:gap-4">
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="service" value="Soin du visage signature" class="peer sr-only"
-                                data-duration="60 min" data-price="85 €" checked>
-                            <span
-                                class="block rounded-[22px] border border-div bg-default p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-button peer-checked:shadow-xl/20 peer-checked:border-[#8F755E] sm:rounded-[28px] sm:p-5">
-                                <span class="font-hatton text-xl text-main block mb-2 sm:text-2xl">Soin du visage</span>
-                                <span class="font-hatton text-sm block mb-4">Nettoyage profond et éclat immédiat</span>
-                                <span class="font-hatton text-main">60 min • 85 €</span>
-                            </span>
-                        </label>
-                                            
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="service" value="Rituel anti-stress" class="peer sr-only"
-                                data-duration="75 min" data-price="110 €">
-                            <span
-                                class="block rounded-[22px] border border-div bg-default p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-button peer-checked:shadow-xl/20 peer-checked:border-[#8F755E] sm:rounded-[28px] sm:p-5">
-                                <span class="font-hatton text-xl text-main block mb-2 sm:text-2xl">Rituel anti-stress</span>
-                                <span class="font-hatton text-sm block mb-4">Massage visage et détente profonde</span>
-                                <span class="font-hatton text-main">75 min • 110 €</span>
-                            </span>
-                        </label>
-
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="service" value="Hydratation intense" class="peer sr-only"
-                                data-duration="50 min" data-price="78 €">
-                            <span
-                                class="block rounded-[22px] border border-div bg-default p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-button peer-checked:shadow-xl/20 peer-checked:border-[#8F755E] sm:rounded-[28px] sm:p-5">
-                                <span class="font-hatton text-xl text-main block mb-2 sm:text-2xl">Hydratation intense</span>
-                                <span class="font-hatton text-sm block mb-4">Soin nourrissant pour peau fatiguée</span>
-                                <span class="font-hatton text-main">50 min • 78 €</span>
-                            </span>
-                        </label>
+                        <?php if (empty($soins)): ?>
+                            <p class="col-span-full rounded-[20px] bg-default px-4 py-4 text-center font-hatton text-main">
+                                Aucun soin disponible pour le moment.
+                            </p>
+                        <?php else: ?>
+                            <?php foreach ($soins as $soin): ?>
+                                <label class="block cursor-pointer">
+                                    <input type="radio" name="service" value="<?= htmlspecialchars($soin['libelle']) ?>" class="peer sr-only"
+                                        data-duration="<?= htmlspecialchars($soin['duree']) ?> min" data-price="<?= htmlspecialchars(number_format($soin['prix'], 2, '.', '')) ?> €">
+                                    <span
+                                        class="block rounded-[22px] border border-div bg-default p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-button peer-checked:shadow-xl/20 peer-checked:border-[#8F755E] sm:rounded-[28px] sm:p-5">
+                                        <span class="font-hatton text-xl text-main block mb-2 sm:text-2xl"><?= htmlspecialchars($soin['libelle']) ?></span>
+                                        <span class="font-hatton text-sm block mb-4"><?= htmlspecialchars($soin['description']) ?></span>
+                                        <span class="font-hatton text-main"><?= htmlspecialchars($soin['duree']) ?> min • <?= htmlspecialchars(number_format($soin['prix'], 2, ',', '')) ?> €</span>
+                                    </span>
+                                </label>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -78,11 +72,11 @@ $firstExpertName = empty($experts) ? 'Aucun expert' : trim($experts[0]['prenom']
                         </div>
                     <?php else: ?>
                         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 md:gap-4">
-                            <?php foreach ($experts as $index => $expert): ?>
+                            <?php foreach ($experts as $expert): ?>
                                 <?php $expertName = trim($expert['prenom'] . ' ' . $expert['nom']); ?>
                                 <label class="block cursor-pointer">
                                     <input type="radio" name="expert" value="<?= htmlspecialchars($expert['id_user']) ?>"
-                                        data-name="<?= htmlspecialchars($expertName) ?>" class="peer sr-only" <?= $index === 0 ? 'checked' : '' ?>>
+                                        data-name="<?= htmlspecialchars($expertName) ?>" class="peer sr-only">
                                     <span
                                         class="block rounded-[22px] border border-div bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl/20 peer-checked:bg-default peer-checked:shadow-xl/20 peer-checked:border-[#8F755E] sm:rounded-[28px] sm:p-5">
                                         <span class="font-hatton text-xl text-main block sm:text-2xl"><?= htmlspecialchars($expertName) ?></span>
@@ -199,43 +193,7 @@ $firstExpertName = empty($experts) ? 'Aucun expert' : trim($experts[0]['prenom']
                 </div>
             </form>
 
-            <aside class="self-start space-y-6 xl:sticky xl:top-6">
-                <div class="bg-div rounded-[28px] p-4 shadow-xl/20 sm:rounded-[40px] sm:p-6 md:p-8">
-                    <p class="font-hatton text-xs uppercase tracking-[0.22em] mb-4 sm:text-sm sm:tracking-[0.3em]">Résumé</p>
-                    <h2 class="font-hatton text-2xl text-main mb-5 sm:text-3xl md:mb-6">Votre sélection</h2>
 
-                    <div class="space-y-4">
-                        <div class="rounded-[22px] bg-[#E8E2D9] p-4 sm:rounded-[28px] sm:p-5">
-                            <p class="font-hatton text-sm mb-1">Soin</p>
-                            <p class="break-words font-hatton text-xl text-main sm:text-2xl" id="summary-service">Soin du visage signature</p>
-                        </div>
-                        <div class="rounded-[22px] bg-[#E8E2D9] p-4 sm:rounded-[28px] sm:p-5">
-                            <p class="font-hatton text-sm mb-1">Expert</p>
-                            <p class="break-words font-hatton text-xl text-main sm:text-2xl" id="summary-expert"><?= htmlspecialchars($firstExpertName) ?></p>
-                        </div>
-                        <div class="rounded-[22px] bg-[#E8E2D9] p-4 sm:rounded-[28px] sm:p-5">
-                            <p class="font-hatton text-sm mb-1">Date & créneau</p>
-                            <p class="break-words font-hatton text-xl text-main sm:text-2xl" id="summary-slot">Aucun créneau disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 rounded-[22px] border border-[#E8E2D9] p-4 sm:rounded-[28px] sm:p-5">
-                        <div class="flex items-center justify-between gap-4">
-                            <span class="font-hatton text-main">Durée</span>
-                            <span class="font-hatton text-main" id="summary-duration">60 min</span>
-                        </div>
-                        <div class="flex items-center justify-between gap-4 mt-3">
-                            <span class="font-hatton text-main">Tarif</span>
-                            <span class="font-hatton text-main" id="summary-price">85 €</span>
-                        </div>
-                        <div class="flex items-center justify-between gap-4 mt-3">
-                            <span class="font-hatton text-main">Mode</span>
-                            <span class="text-right font-hatton text-main" id="summary-payment">Paiement en ligne</span>
-                        </div>
-                    </div>
-                </div>
-
-            </aside>
         </div>
     </section>
 </main>

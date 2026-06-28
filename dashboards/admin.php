@@ -53,6 +53,9 @@ include(__DIR__ . '/../headers/header.php');
             <a href="products.php" class="mt-5 inline-block rounded-full bg-button px-6 py-3 font-hatton text-main">
                 Gérer les produits du shop
             </a>
+            <a href="soins.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
+                Gérer les soins
+            </a>
             <a href="creneaux.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
                 Gérer les créneaux RDV
             </a>
@@ -61,6 +64,9 @@ include(__DIR__ . '/../headers/header.php');
             </a>
             <a href="../pages/captcha.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
                 Ajouter des images pour le captcha
+            </a>
+            <a href="send_newsletter.php" class="mt-5 ml-3 inline-block rounded-full border border-[#CBB59D] px-6 py-3 font-hatton text-main">
+                Envoyer une newsletter
             </a>
         </div>
 

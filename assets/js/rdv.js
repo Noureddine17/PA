@@ -3,13 +3,6 @@ const formulaireRdv = document.getElementById("rdv-form");
 const dateRdv = document.getElementById("date");
 const listeCreneaux = document.getElementById("slot-list");
 
-const resumeSoin = document.getElementById("summary-service");
-const resumeExpert = document.getElementById("summary-expert");
-const resumeCreneau = document.getElementById("summary-slot");
-const resumeDuree = document.getElementById("summary-duration");
-const resumePrix = document.getElementById("summary-price");
-const resumePaiement = document.getElementById("summary-payment");
-const noteValidation = document.getElementById("validation-note");
 const hiddenDuration = document.getElementById("hidden-duration");
 const hiddenPrice = document.getElementById("hidden-price");
 
@@ -36,26 +29,9 @@ function changerResume() {
     return;
   }
 
-  resumeSoin.textContent = soin.value;
-  resumeDuree.textContent = soin.dataset.duration;
-  resumePrix.textContent = soin.dataset.price;
-  resumeExpert.textContent = expert ? expert.dataset.name : "Aucun expert";
-
   if (hiddenDuration) {
-    hiddenDuration.value = soin.dataset.duration;
-    hiddenPrice.value = soin.dataset.price;
-  }
-  resumeCreneau.textContent = creneau
-    ? formatDate(dateRdv.value) + " • " + creneau.value
-    : "Aucun créneau disponible";
-  resumePaiement.textContent = paiement.value;
-
-  if (paiement.value === "Paiement en ligne") {
-    noteValidation.textContent =
-      "Action suivante : ajout du rendez-vous au panier.";
-  } else {
-    noteValidation.textContent =
-      "Action suivante : envoi d’un mail de confirmation pour paiement sur place.";
+    hiddenDuration.value = parseInt(soin.dataset.duration);
+    hiddenPrice.value = parseFloat(soin.dataset.price);
   }
 }
 
@@ -194,9 +170,11 @@ dateRdv.addEventListener("change", function () {
 
 if (formulaireRdv) {
   formulaireRdv.addEventListener("submit", function (event) {
+    event.preventDefault();
     if (estConnecte === false) {
-      event.preventDefault();
       window.location.href = baseUrl + "/auth/login.php";
+    } else {
+      formulaireRdv.submit();
     }
   });
   mettreAJourCreneaux();
